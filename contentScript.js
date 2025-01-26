@@ -53,7 +53,7 @@ function ocrScreenshot(base64Image) {
       console.log("OCR recognized text:", extractedText);
 
       // Conditionally open a new tab with the OCR result based on user preference
-      if (openOcrText) { // New Condition
+      if (openOcrText) {
         const textWin = window.open("", "_blank");
         if (textWin) {
           textWin.document.write(`
@@ -70,14 +70,99 @@ function ocrScreenshot(base64Image) {
           console.error("Failed to open new window for OCR result.");
         }
       } else {
-        // If not opening OCR text in a new tab, you might want to handle it differently
-        // For example, send the text to the background script or display it within the page
         console.log("OCR Text:", extractedText);
       }
+
+      // Send the OCR text to the background script to query OpenAI
+      sendOcrTextToBackground(extractedText);
     })
     .catch((err) => {
       console.error("Tesseract OCR Error:", err);
     });
+}
+
+/**
+ * Send the OCR text to the background script for processing with OpenAI
+ * @param {string} text - The extracted OCR text
+ */
+function sendOcrTextToBackground(text) {
+  chrome.runtime.sendMessage({ action: "send-ocr-text", text }, (response) => {
+    if (chrome.runtime.lastError) {
+      console.error("Error sending message to background script:", chrome.runtime.lastError.message);
+      return;
+    }
+
+    if (response && response.answer) {
+      console.log("Received answer from OpenAI:", response.answer);
+      displayChatGptResponse(response.answer);
+    } else if (response && response.error) {
+      console.error("Error from background script:", response.error);
+    } else {
+      console.error("No response received from background script.");
+    }
+  });
+}
+
+/**
+ * Display the ChatGPT response as an overlay on the current page
+ * @param {string} answer - The response from ChatGPT
+ */
+function displayChatGptResponse(answer) {
+  // Create an overlay div
+  const overlay = document.createElement('div');
+  overlay.id = 'chatgpt-response-overlay';
+  Object.assign(overlay.style, {
+    position: 'fixed',
+    top: '10%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '80%',
+    maxWidth: '600px',
+    backgroundColor: '#fff',
+    border: '2px solid #000',
+    borderRadius: '8px',
+    padding: '20px',
+    zIndex: 1000001,
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    overflowY: 'auto',
+    maxHeight: '80vh',
+  });
+
+  // Add a close button
+  const closeButton = document.createElement('button');
+  closeButton.textContent = 'Close';
+  Object.assign(closeButton.style, {
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    padding: '5px 10px',
+    cursor: 'pointer',
+  });
+  closeButton.addEventListener('click', () => {
+    overlay.remove();
+  });
+
+  // Add content to the overlay
+  const content = document.createElement('div');
+  content.innerHTML = `
+    <h2>ChatGPT Response</h2>
+    <p>${sanitizeHtml(answer)}</p>
+  `;
+
+  overlay.appendChild(closeButton);
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+}
+
+/**
+ * Sanitize HTML to prevent XSS attacks when injecting content into the page
+ * @param {string} html - The HTML content to sanitize
+ * @returns {string} - Sanitized HTML content
+ */
+function sanitizeHtml(html) {
+  const div = document.createElement('div');
+  div.textContent = html;
+  return div.innerHTML;
 }
 
 /**
