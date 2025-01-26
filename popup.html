@@ -5,11 +5,14 @@
   <style>
     body {
       min-width: 250px;
-      min-height: 120px;
+      min-height: 150px; /* Increased height to accommodate new checkbox */
       font-family: sans-serif;
       margin: 15px;
     }
     button {
+      margin-bottom: 10px;
+    }
+    .checkbox-group {
       margin-bottom: 10px;
     }
   </style>
@@ -23,12 +26,22 @@
   <br><br>
 
   <!-- Checkbox to control opening the screenshot in a new tab -->
-  <label>
-    <input type="checkbox" id="toggle-open-screenshot" checked />
-    Open screenshot in new tab
-  </label>
+  <div class="checkbox-group">
+    <label>
+      <input type="checkbox" id="toggle-open-screenshot" checked />
+      Open screenshot in new tab
+    </label>
+  </div>
   
-  <br><br>
+  <!-- New Checkbox to control opening the OCR text in a new tab -->
+  <div class="checkbox-group">
+    <label>
+      <input type="checkbox" id="toggle-open-ocr-text" checked />
+      Open OCR text in new tab
+    </label>
+  </div>
+  
+  <br>
 
   <!-- Status message to show Tesseract loading/ready -->
   <span id="status" style="color: red;">Loading Tesseract...</span>

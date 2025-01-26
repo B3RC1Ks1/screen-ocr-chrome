@@ -3,6 +3,7 @@ console.log("Content script loaded");
 
 // 2. Global variables
 let openScreenshot = false;      // Controls whether to open the screenshot in a new tab
+let openOcrText = false;         // Controls whether to open OCR text in a new tab
 let tesseractReady = false;      // Tracks if Tesseract.js is loaded
 
 /**
@@ -51,21 +52,27 @@ function ocrScreenshot(base64Image) {
       const extractedText = result.data.text.trim();
       console.log("OCR recognized text:", extractedText);
 
-      // Open a new tab and display the recognized text
-      const textWin = window.open("", "_blank");
-      if (textWin) {
-        textWin.document.write(`
-          <html>
-            <head><title>OCR Result</title></head>
-            <body style="margin:20px; font-family: sans-serif;">
-              <h1>Extracted Text</h1>
-              <pre style="white-space: pre-wrap;">${extractedText}</pre>
-            </body>
-          </html>
-        `);
-        textWin.document.close();
+      // Conditionally open a new tab with the OCR result based on user preference
+      if (openOcrText) { // New Condition
+        const textWin = window.open("", "_blank");
+        if (textWin) {
+          textWin.document.write(`
+            <html>
+              <head><title>OCR Result</title></head>
+              <body style="margin:20px; font-family: sans-serif;">
+                <h1>Extracted Text</h1>
+                <pre style="white-space: pre-wrap;">${extractedText}</pre>
+              </body>
+            </html>
+          `);
+          textWin.document.close();
+        } else {
+          console.error("Failed to open new window for OCR result.");
+        }
       } else {
-        console.error("Failed to open new window for OCR result.");
+        // If not opening OCR text in a new tab, you might want to handle it differently
+        // For example, send the text to the background script or display it within the page
+        console.log("OCR Text:", extractedText);
       }
     })
     .catch((err) => {
@@ -86,8 +93,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "start-ocr-selection") {
     console.log("[Content Script] Starting OCR Selection");
 
-    // Update the flag based on the message
+    // Update the flags based on the message
     openScreenshot = message.openScreenshot || false;
+    openOcrText = message.openOcrText || false; // New Option
 
     // Remove any existing overlay to prevent duplicates
     const existingOverlay = document.getElementById("my-ocr-overlay");
