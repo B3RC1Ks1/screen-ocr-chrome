@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Screen OCR + ChatGPT</title>
+  <style>
+    body {
+      min-width: 250px;
+      min-height: 120px;
+      font-family: sans-serif;
+      margin: 15px;
+    }
+    button {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>OCR Demo</h1>
+  
+  <!-- Button is disabled by default; we enable it once Tesseract is confirmed loaded -->
+  <button id="start-selection" disabled>Start OCR Selection</button>
+  
+  <br><br>
+
+  <!-- Checkbox to control opening the screenshot in a new tab -->
+  <label>
+    <input type="checkbox" id="toggle-open-screenshot" checked />
+    Open screenshot in new tab
+  </label>
+  
+  <br><br>
+
+  <!-- Status message to show Tesseract loading/ready -->
+  <span id="status" style="color: red;">Loading Tesseract...</span>
+
+  <script src="popup.js"></script>
+</body>
+</html>
