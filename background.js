@@ -20,7 +20,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: ocrText }),
+        body: JSON.stringify({
+          message: "If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text\n" + ocrText
+        }),
       })
         .then((res) => {
           if (!res.ok) {
