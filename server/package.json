@@ -1,10 +1,11 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node index",
-    "dev": "node --watch --env-file=.env index"
+    "start": "node index.js",
+    "dev": "node --watch --env-file=.env --no-deprecation index.js"
   },
   "keywords": [],
   "author": "",
