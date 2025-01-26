@@ -45,7 +45,7 @@ function ocrScreenshot(base64Image) {
     return;
   }
 
-  Tesseract.recognize(base64Image, "eng", {
+  Tesseract.recognize(base64Image, "eng+pol", {
     logger: (m) => console.log("[Tesseract progress]", m),
   })
     .then((result) => {
