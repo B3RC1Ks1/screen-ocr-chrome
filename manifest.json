@@ -1,6 +1,6 @@
 {
   "name": "Screen OCR + ChatGPT Extension",
-  "version": "0.1",
+  "version": "0.0.2",
   "manifest_version": 3,
   "description": "Select an area of the screen, perform OCR, and query ChatGPT.",
   "permissions": [

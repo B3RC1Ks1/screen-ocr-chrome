@@ -1,49 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Screen OCR + ChatGPT</title>
   <style>
     body {
-      min-width: 250px;
-      min-height: 150px; /* Increased height to accommodate new checkbox */
-      font-family: sans-serif;
+      min-width: 300px;
+      min-height: 200px;
+      font-family: Arial, sans-serif;
       margin: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
     button {
-      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
     }
     .checkbox-group {
-      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .checkbox-group input {
+      width: 18px;
+      height: 18px;
+    }
+    #status {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>OCR Demo</h1>
-  
-  <!-- Button is disabled by default; we enable it once Tesseract is confirmed loaded -->
+  <h1>OCR & ChatGPT</h1>
+
+  <!-- Start Selection Button -->
   <button id="start-selection" disabled>Start OCR Selection</button>
-  
-  <br><br>
 
-  <!-- Checkbox to control opening the screenshot in a new tab -->
+  <!-- Options -->
   <div class="checkbox-group">
-    <label>
-      <input type="checkbox" id="toggle-open-screenshot" checked />
-      Open screenshot in new tab
-    </label>
+    <input type="checkbox" id="toggle-open-screenshot" checked />
+    <label for="toggle-open-screenshot">Open screenshot in new tab</label>
   </div>
-  
-  <!-- New Checkbox to control opening the OCR text in a new tab -->
-  <div class="checkbox-group">
-    <label>
-      <input type="checkbox" id="toggle-open-ocr-text" checked />
-      Open OCR text in new tab
-    </label>
-  </div>
-  
-  <br>
 
-  <!-- Status message to show Tesseract loading/ready -->
+  <div class="checkbox-group">
+    <input type="checkbox" id="toggle-open-ocr-text" checked />
+    <label for="toggle-open-ocr-text">Open OCR text in new tab</label>
+  </div>
+
+  <!-- Status Message -->
   <span id="status" style="color: red;">Loading Tesseract...</span>
 
   <script src="popup.js"></script>
