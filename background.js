@@ -1,5 +1,3 @@
-// background.js
-
 const SERVER_URL = "http://localhost:3000/chat";
 
 /**

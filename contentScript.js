@@ -134,57 +134,49 @@
   };
 
   /**
-   * Display the ChatGPT response as an overlay on the current page
+   * Display the ChatGPT response discretely and close on any click
    * @param {string} answer - The response from ChatGPT
    */
   const displayChatGptResponse = (answer) => {
     // Prevent multiple overlays
-    if (document.getElementById('chatgpt-response-overlay')) return;
+    if (document.getElementById("chatgpt-response-overlay")) return;
 
-    // Create an overlay div
-    const overlay = document.createElement('div');
-    overlay.id = 'chatgpt-response-overlay';
+    // Create a transparent full-page overlay
+    const overlay = document.createElement("div");
+    overlay.id = "chatgpt-response-overlay";
     Object.assign(overlay.style, {
-      position: 'fixed',
-      top: '10%',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '80%',
-      maxWidth: '600px',
-      backgroundColor: '#fff',
-      border: '2px solid #000',
-      borderRadius: '8px',
-      padding: '20px',
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      backgroundColor: "rgba(0, 0, 0, 0.0)",
       zIndex: 1000001,
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-      overflowY: 'auto',
-      maxHeight: '80vh',
+      cursor: "pointer",
     });
 
-    // Add a close button
-    const closeButton = document.createElement('button');
-    closeButton.setAttribute('aria-label', 'Close ChatGPT Response');
-    closeButton.textContent = 'Close';
-    Object.assign(closeButton.style, {
-      position: 'absolute',
-      top: '10px',
-      right: '10px',
-      padding: '5px 10px',
-      cursor: 'pointer',
+    // Create a content container
+    const container = document.createElement("div");
+    Object.assign(container.style, {
+      position: "absolute",
+      bottom: "10px",
+      right: "50px",
+      width: "300px",
+      pointerEvents: "none", // allow clicks to pass through
     });
-    closeButton.addEventListener('click', () => {
+
+    // Click anywhere to remove
+    overlay.addEventListener("click", () => {
       overlay.remove();
     });
 
-    // Add content to the overlay
-    const content = document.createElement('div');
+    // Add content
+    const content = document.createElement("div");
     content.innerHTML = `
-      <h2>ChatGPT Response</h2>
-      <p>${sanitizeHtml(answer)}</p>
+      <p style="margin: 0;">${sanitizeHtml(answer)}</p>
     `;
-
-    overlay.appendChild(closeButton);
-    overlay.appendChild(content);
+    container.appendChild(content);
+    overlay.appendChild(container);
     document.body.appendChild(overlay);
   };
 
