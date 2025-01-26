@@ -1,76 +1,86 @@
-// popup.js
+document.addEventListener("DOMContentLoaded", () => {
+  const startSelectionBtn = document.getElementById("start-selection");
+  const openScreenshotCheckbox = document.getElementById("toggle-open-screenshot");
+  const openOcrTextCheckbox = document.getElementById("toggle-open-ocr-text"); // New Checkbox
+  const statusSpan = document.getElementById("status");
 
-(() => {
-  document.addEventListener("DOMContentLoaded", () => {
-    const startSelectionBtn = document.getElementById("start-selection");
-    const openScreenshotCheckbox = document.getElementById("toggle-open-screenshot");
-    const openOcrTextCheckbox = document.getElementById("toggle-open-ocr-text"); // New Checkbox
-    const statusSpan = document.getElementById("status");
+  // Load saved settings from chrome.storage.local
+  chrome.storage.local.get(
+    ["openScreenshot", "openOcrText"],
+    ({ openScreenshot, openOcrText }) => {
+      openScreenshotCheckbox.checked =
+        openScreenshot !== undefined ? openScreenshot : true;
+      openOcrTextCheckbox.checked =
+        openOcrText !== undefined ? openOcrText : true;
+    }
+  );
 
-    /**
-     * Initialize the popup by checking if Tesseract is ready in the active tab.
-     */
-    const initializePopup = async () => {
-      try {
-        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  // Save settings to chrome.storage.local whenever they change
+  const saveSettings = () => {
+    const settings = {
+      openScreenshot: openScreenshotCheckbox.checked,
+      openOcrText: openOcrTextCheckbox.checked,
+    };
+    chrome.storage.local.set(settings, () => {
+      console.log("Settings saved:", settings);
+    });
+  };
 
-        if (!activeTab.id) {
-          throw new Error("No active tab found.");
+  openScreenshotCheckbox.addEventListener("change", saveSettings);
+  openOcrTextCheckbox.addEventListener("change", saveSettings);
+
+  // 1. Check if Tesseract is loaded in the current active tab's content script.
+  //    We'll send a message: { action: "check-tesseract-ready" }.
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const activeTabId = tabs[0].id;
+
+    chrome.tabs.sendMessage(
+      activeTabId,
+      { action: "check-tesseract-ready" },
+      (response) => {
+        // If there's an error or no content script, we'll see an error in chrome.runtime.lastError.
+        if (chrome.runtime.lastError) {
+          console.error(
+            "No content script found or error:",
+            chrome.runtime.lastError.message
+          );
+          statusSpan.textContent = "No content script found on this page.";
+          statusSpan.style.color = "red";
+          return;
         }
 
-        const response = await chrome.tabs.sendMessage(activeTab.id, { action: "check-tesseract-ready" });
-
-        if (response?.tesseractReady) {
+        // If the content script responds with tesseractReady = true
+        if (response && response.tesseractReady === true) {
           statusSpan.textContent = "Tesseract ready!";
           statusSpan.style.color = "green";
-          startSelectionBtn.disabled = false;
+          startSelectionBtn.disabled = false; // enable the button
         } else {
           statusSpan.textContent = "Tesseract not yet loaded.";
           statusSpan.style.color = "orange";
           startSelectionBtn.disabled = true;
         }
-      } catch (error) {
-        console.error("Error initializing popup:", error);
-        statusSpan.textContent = "No content script found on this page.";
-        statusSpan.style.color = "red";
-        startSelectionBtn.disabled = true;
       }
-    };
-
-    /**
-     * Start OCR Selection by sending a message to the content script.
-     */
-    const startOcrSelection = async () => {
-      try {
-        startSelectionBtn.disabled = true;
-        statusSpan.textContent = "Starting OCR Selection...";
-        statusSpan.style.color = "blue";
-
-        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-        if (!activeTab.id) {
-          throw new Error("No active tab found.");
-        }
-
-        await chrome.tabs.sendMessage(activeTab.id, {
-          action: "start-ocr-selection",
-          openScreenshot: openScreenshotCheckbox.checked,
-          openOcrText: openOcrTextCheckbox.checked
-        });
-
-        // Optionally close the popup so it doesn't block screen area
-        window.close();
-      } catch (error) {
-        console.error("Error starting OCR selection:", error);
-        statusSpan.textContent = "Failed to start OCR selection.";
-        statusSpan.style.color = "red";
-      }
-    };
-
-    // Event Listener for Start Selection Button
-    startSelectionBtn.addEventListener("click", startOcrSelection);
-
-    // Initialize the popup on load
-    initializePopup();
+    );
   });
-})();
+
+  // 2. When the user clicks "Start OCR Selection"
+  startSelectionBtn.addEventListener("click", () => {
+    // Read whether user wants to open screenshot in new tab
+    const openScreenshot = openScreenshotCheckbox.checked;
+
+    // Read whether user wants to open OCR text in new tab
+    const openOcrText = openOcrTextCheckbox.checked; // New Option
+
+    // Send a message to the content script to begin the overlay selection
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: "start-ocr-selection",
+        openScreenshot: openScreenshot,
+        openOcrText: openOcrText, // Pass the new option
+      });
+
+      // Optionally close the popup so it doesn't block screen area
+      window.close();
+    });
+  });
+});

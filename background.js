@@ -1,6 +1,6 @@
 // background.js
 
-const SERVER_URL = "http://localhost:3000/chat"; // Consider moving to environment variables or using chrome.storage
+const SERVER_URL = "http://localhost:3000/chat";
 
 /**
  * Handles messages from content scripts and popup.
@@ -68,7 +68,8 @@ const handleSendOcrText = async (request, sendResponse) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Server responded with status ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Server responded with status ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
@@ -83,3 +84,43 @@ const handleSendOcrText = async (request, sendResponse) => {
     sendResponse({ error: error.message });
   }
 };
+
+/**
+ * Handle keyboard shortcut commands.
+ */
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === "start-ocr-selection") {
+    console.log("Keyboard shortcut triggered: Start OCR Selection");
+
+    try {
+      // Get the active tab
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+      if (!activeTab.id) {
+        console.error("No active tab found.");
+        return;
+      }
+
+      // Retrieve saved settings
+      chrome.storage.local.get(
+        ["openScreenshot", "openOcrText"],
+        ({ openScreenshot, openOcrText }) => {
+          // Send a message to the content script to begin the overlay selection
+          chrome.tabs.sendMessage(activeTab.id, {
+            action: "start-ocr-selection",
+            openScreenshot: openScreenshot !== undefined ? openScreenshot : true,
+            openOcrText: openOcrText !== undefined ? openOcrText : true,
+          }, (response) => {
+            if (chrome.runtime.lastError) {
+              console.error("Error sending message to content script:", chrome.runtime.lastError.message);
+            } else {
+              console.log("OCR selection started via keyboard shortcut.");
+            }
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Error handling keyboard shortcut:", error);
+    }
+  }
+});
