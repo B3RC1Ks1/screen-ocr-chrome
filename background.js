@@ -1,6 +1,6 @@
 // background.js
 
-const SERVER_URL = "http://localhost:3000/chat";
+const SERVER_URL = "https://screen-ocr-chrome.onrender.com/chat";
 
 /**
  * Handles messages from content scripts and popup.
