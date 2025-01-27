@@ -14,10 +14,10 @@
     "https://screen-ocr-chrome.onrender.com"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "backend/background.js"
   },
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup/popup.html"
   },
   "content_scripts": [
     {
