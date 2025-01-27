@@ -12,9 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ["openScreenshot", "openOcrText", "selectedModel"],
     ({ openScreenshot, openOcrText, selectedModel }) => {
       openScreenshotCheckbox.checked =
-        openScreenshot !== undefined ? openScreenshot : true;
+        openScreenshot !== undefined ? openScreenshot : false;
       openOcrTextCheckbox.checked =
-        openOcrText !== undefined ? openOcrText : true;
+        openOcrText !== undefined ? openOcrText : false;
       modelSelect.value = selectedModel || "gpt-4o-mini"; // Set default model if not set
     }
   );

@@ -36,6 +36,12 @@
     label {
       font-size: 14px;
     }
+    /* Optional: Enhance the appearance of the dropdown */
+    .dropdown-group select {
+      padding: 5px;
+      font-size: 14px;
+      width: 150px; /* Adjust width as needed */
+    }
   </style>
 </head>
 <body>
@@ -56,12 +62,12 @@
 
   <!-- Options -->
   <div class="checkbox-group">
-    <input type="checkbox" id="toggle-open-screenshot" checked />
+    <input type="checkbox" id="toggle-open-screenshot" />
     <label for="toggle-open-screenshot">Open screenshot in new tab</label>
   </div>
 
   <div class="checkbox-group">
-    <input type="checkbox" id="toggle-open-ocr-text" checked />
+    <input type="checkbox" id="toggle-open-ocr-text" />
     <label for="toggle-open-ocr-text">Open OCR text in new tab</label>
   </div>
 
