@@ -59,7 +59,7 @@ app.post("/chat", async (req, res) => {
       });
   }
 
-  const selectedModel = model || "gpt-4o-mini"; // Default model if not provided
+  const selectedModel = model || "gpt-4o"; // Default model if not provided
 
   try {
     const completion = await openai.chat.completions.create({
