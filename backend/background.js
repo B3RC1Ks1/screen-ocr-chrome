@@ -62,7 +62,7 @@ const handleSendOcrText = async (request, sendResponse) => {
   try {
     // Retrieve the selected model from storage
     chrome.storage.local.get(["selectedModel"], async ({ selectedModel }) => {
-      const model = selectedModel || "gpt-4o-mini"; // Default model if not set
+      const model = selectedModel || "gpt-4o"; // Default model if not set
 
       const response = await fetch(SERVER_URL, {
         method: "POST",

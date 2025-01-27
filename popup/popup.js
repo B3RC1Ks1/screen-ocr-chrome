@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         openScreenshot !== undefined ? openScreenshot : false;
       openOcrTextCheckbox.checked =
         openOcrText !== undefined ? openOcrText : false;
-      modelSelect.value = selectedModel || "gpt-4o-mini"; // Set default model if not set
+      modelSelect.value = selectedModel || "gpt-4o"; // Set default model if not set
     }
   );
 
