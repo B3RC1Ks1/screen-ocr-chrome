@@ -34,18 +34,28 @@ const openai = new OpenAI({
   // project: 'your-project-id',
 });
 
+// Allowed Models List (Whitelist)
+const ALLOWED_MODELS = ['gpt-4o', 'gpt-4o-mini']; // Add more models as needed
+
 // POST /chat endpoint
 app.post('/chat', async (req, res) => {
-  const { message } = req.body;
+  const { message, model } = req.body;
 
   // Input Validation
   if (!message || typeof message !== 'string') {
     return res.status(400).json({ error: 'A valid "message" field is required.' });
   }
 
+  // Validate Model
+  if (model && !ALLOWED_MODELS.includes(model)) {
+    return res.status(400).json({ error: `Invalid model. Allowed models are: ${ALLOWED_MODELS.join(', ')}` });
+  }
+
+  const selectedModel = model || 'gpt-4o-mini'; // Default model if not provided
+
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // Correct model name
+      model: selectedModel, // Use the selected model
       messages: [
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: message },

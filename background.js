@@ -1,3 +1,5 @@
+// background.js
+
 const SERVER_URL = "http://localhost:3000/chat";
 
 /**
@@ -55,28 +57,34 @@ const handleSendOcrText = async (request, sendResponse) => {
   }
 
   try {
-    const response = await fetch(SERVER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: `If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration\n${text}`
-      }),
+    // Retrieve the selected model from storage
+    chrome.storage.local.get(["selectedModel"], async ({ selectedModel }) => {
+      const model = selectedModel || "gpt-4o-mini"; // Default model if not set
+
+      const response = await fetch(SERVER_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: `If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration\n${text}`,
+          model: model, // Include the selected model
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+
+      if (data?.response) {
+        sendResponse({ answer: data.response });
+      } else {
+        throw new Error("Invalid response structure from server.");
+      }
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Server responded with status ${response.status}: ${errorText}`);
-    }
-
-    const data = await response.json();
-
-    if (data?.response) {
-      sendResponse({ answer: data.response });
-    } else {
-      throw new Error("Invalid response structure from server.");
-    }
   } catch (error) {
     console.error("Error communicating with server:", error);
     sendResponse({ error: error.message });

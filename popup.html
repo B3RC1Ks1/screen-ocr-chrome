@@ -6,7 +6,7 @@
   <style>
     body {
       min-width: 300px;
-      min-height: 200px;
+      min-height: 250px; /* Increased height to accommodate new elements */
       font-family: Arial, sans-serif;
       margin: 15px;
       display: flex;
@@ -18,22 +18,46 @@
       font-size: 16px;
       cursor: pointer;
     }
-    .checkbox-group {
+    .checkbox-group, .dropdown-group, .selected-model-group {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .checkbox-group input {
+    .checkbox-group input, .dropdown-group select {
       width: 18px;
       height: 18px;
     }
     #status {
       font-weight: bold;
     }
+    label {
+      font-size: 14px;
+    }
+    /* New styling for the selected model display */
+    .selected-model-group {
+      font-size: 16px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <h1>OCR & ChatGPT</h1>
+
+  <!-- Selected Model Display -->
+  <div class="selected-model-group">
+    <span>Selected Model:</span>
+    <span id="current-model">Loading...</span>
+  </div>
+
+  <!-- Dropdown for GPT Model Selection -->
+  <div class="dropdown-group">
+    <label for="model-select">Change GPT Model:</label>
+    <select id="model-select">
+      <option value="gpt-4o">GPT-4o</option>
+      <option value="gpt-4o-mini">GPT-4o-mini</option>
+      <!-- Add more models as needed -->
+    </select>
+  </div>
 
   <!-- Start Selection Button -->
   <button id="start-selection" disabled>Start OCR Selection</button>
