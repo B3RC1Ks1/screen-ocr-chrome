@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const openScreenshotCheckbox = document.getElementById("toggle-open-screenshot");
   const openOcrTextCheckbox = document.getElementById("toggle-open-ocr-text"); // Existing Checkbox
   const modelSelect = document.getElementById("model-select"); // Dropdown
-  const currentModelSpan = document.getElementById("current-model"); // New Display Element
   const statusSpan = document.getElementById("status");
 
   // Load saved settings from chrome.storage.local
@@ -17,9 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
       openOcrTextCheckbox.checked =
         openOcrText !== undefined ? openOcrText : true;
       modelSelect.value = selectedModel || "gpt-4o-mini"; // Set default model if not set
-
-      // Update the selected model display
-      currentModelSpan.textContent = modelSelect.options[modelSelect.selectedIndex].text;
     }
   );
 
@@ -33,9 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.local.set(settings, () => {
       console.log("Settings saved:", settings);
     });
-
-    // Update the selected model display
-    currentModelSpan.textContent = modelSelect.options[modelSelect.selectedIndex].text;
   };
 
   openScreenshotCheckbox.addEventListener("change", saveSettings);
@@ -86,11 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Read the selected GPT model
     const selectedModel = modelSelect.value;
-
-    // Save the selected model (optional, already handled by change listener)
-    // chrome.storage.local.set({ selectedModel }, () => {
-    //   console.log("Selected model saved:", selectedModel);
-    // });
 
     // Send a message to the content script to begin the overlay selection
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
