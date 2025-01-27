@@ -1,8 +1,8 @@
 {
-  "name": "Screen OCR + ChatGPT Extension",
-  "version": "1.2.0",
+  "name": "AskAI",
+  "version": "0.1.5",
   "manifest_version": 3,
-  "description": "Select an area of the screen, perform OCR, and query ChatGPT.",
+  "description": "Select an area of the screen and get an answer from ChatGPT!",
   "permissions": [
     "activeTab",
     "scripting",
@@ -49,5 +49,8 @@
       },
       "description": "Start OCR Selection"
     }
+  },
+  "icons": {
+    "128": "logo.png"
   }
 }
