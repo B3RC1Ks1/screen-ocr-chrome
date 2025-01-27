@@ -1,6 +1,6 @@
 {
   "name": "Screen OCR + ChatGPT Extension",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "manifest_version": 3,
   "description": "Select an area of the screen, perform OCR, and query ChatGPT.",
   "permissions": [
@@ -21,7 +21,17 @@
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],
-      "js": ["contentScript.js", "lib/tesseract.min.js"]
+      "js": [
+        "lib/tesseract.min.js",
+        "scripts/logger.js",
+        "scripts/state.js",
+        "scripts/tesseractLoader.js",
+        "scripts/ocr.js",
+        "scripts/ui.js",
+        "scripts/selectionOverlay.js",
+        "scripts/communication.js",
+        "scripts/contentScript.js"
+      ]
     }
   ],
   "web_accessible_resources": [
