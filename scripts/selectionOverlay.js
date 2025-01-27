@@ -102,36 +102,37 @@ const SelectionOverlay = (() => {
     const finalizeSelection = async () => {
       const currentState = State.getState();
       if (!currentState.selection.selectionRect) return;
-  
+    
       // Get the bounding rectangle of the selection
       const rect = currentState.selection.selectionRect.getBoundingClientRect();
       const coords = {
-        x: rect.left + window.scrollX,
-        y: rect.top + window.scrollY,
+        // Remove window.scrollX and window.scrollY to keep coordinates relative to the viewport
+        x: rect.left,
+        y: rect.top,
         width: rect.width,
         height: rect.height,
       };
-  
+    
       // Remove the selection rectangle from the DOM
       currentState.selection.selectionRect.remove();
       State.setState({ selection: { ...currentState.selection, selectionRect: null } });
-  
+    
       try {
         // Request the background script to capture the screenshot
         const response = await Communication.captureScreenshot(coords);
-  
+    
         if (response?.screenshotBase64) {
           const screenshotBase64 = response.screenshotBase64;
-  
+    
           // Crop the screenshot to the selected area
           const croppedDataUrl = await cropScreenshot(screenshotBase64, coords);
           Logger.log("Cropped screenshot:", croppedDataUrl);
-  
+    
           // Optionally open the screenshot in a new tab
           if (currentState.openScreenshot) {
             UI.openImageInNewTab(croppedDataUrl);
           }
-  
+    
           // Perform OCR on the cropped image
           OCR.ocrScreenshot(croppedDataUrl);
         } else {
@@ -141,6 +142,7 @@ const SelectionOverlay = (() => {
         Logger.error("Error during selection finalization:", err);
       }
     };
+    
   
     /**
      * Crop the captured screenshot to the specified coordinates.
