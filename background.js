@@ -30,7 +30,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 const handleSelectionComplete = (request, sendResponse) => {
   chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
     if (chrome.runtime.lastError) {
-      console.error("Error capturing visible tab:", chrome.runtime.lastError.message);
+      console.error(
+        "Error capturing visible tab:",
+        chrome.runtime.lastError.message
+      );
       sendResponse({ error: chrome.runtime.lastError.message });
       return;
     }
@@ -74,7 +77,9 @@ const handleSendOcrText = async (request, sendResponse) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+        throw new Error(
+          `Server responded with status ${response.status}: ${errorText}`
+        );
       }
 
       const data = await response.json();
@@ -100,7 +105,10 @@ chrome.commands.onCommand.addListener(async (command) => {
 
     try {
       // Get the active tab
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const [activeTab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
 
       if (!activeTab.id) {
         console.error("No active tab found.");
@@ -112,17 +120,25 @@ chrome.commands.onCommand.addListener(async (command) => {
         ["openScreenshot", "openOcrText"],
         ({ openScreenshot, openOcrText }) => {
           // Send a message to the content script to begin the overlay selection
-          chrome.tabs.sendMessage(activeTab.id, {
-            action: "start-ocr-selection",
-            openScreenshot: openScreenshot !== undefined ? openScreenshot : true,
-            openOcrText: openOcrText !== undefined ? openOcrText : true,
-          }, (response) => {
-            if (chrome.runtime.lastError) {
-              console.error("Error sending message to content script:", chrome.runtime.lastError.message);
-            } else {
-              console.log("OCR selection started via keyboard shortcut.");
+          chrome.tabs.sendMessage(
+            activeTab.id,
+            {
+              action: "start-ocr-selection",
+              openScreenshot:
+                openScreenshot !== undefined ? openScreenshot : true,
+              openOcrText: openOcrText !== undefined ? openOcrText : true,
+            },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                console.error(
+                  "Error sending message to content script:",
+                  chrome.runtime.lastError.message
+                );
+              } else {
+                console.log("OCR selection started via keyboard shortcut.");
+              }
             }
-          });
+          );
         }
       );
     } catch (error) {

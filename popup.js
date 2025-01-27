@@ -2,7 +2,9 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const startSelectionBtn = document.getElementById("start-selection");
-  const openScreenshotCheckbox = document.getElementById("toggle-open-screenshot");
+  const openScreenshotCheckbox = document.getElementById(
+    "toggle-open-screenshot"
+  );
   const openOcrTextCheckbox = document.getElementById("toggle-open-ocr-text"); // Existing Checkbox
   const modelSelect = document.getElementById("model-select"); // Dropdown
   const statusSpan = document.getElementById("status");

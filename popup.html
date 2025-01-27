@@ -1,79 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Screen OCR + ChatGPT</title>
-  <style>
-    body {
-      min-width: 300px;
-      min-height: 250px; /* Increased height to accommodate dropdown */
-      font-family: Arial, sans-serif;
-      margin: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    button {
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .checkbox-group, .dropdown-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .checkbox-group input, .dropdown-group select {
-      /* Removed fixed width and height */
-      padding: 5px 10px; /* Added padding for better visibility */
-      font-size: 14px;    /* Ensured readable font size */
-      min-height: 30px;    /* Set a minimum height */
-      box-sizing: border-box; /* Ensure padding is included in height */
-    }
-    #status {
-      font-weight: bold;
-    }
-    label {
-      font-size: 14px;
-    }
-    /* Optional: Enhance the appearance of the dropdown */
-    .dropdown-group select {
-      padding: 5px;
-      font-size: 14px;
-      width: 150px; /* Adjust width as needed */
-    }
-  </style>
-</head>
-<body>
-  <h1>OCR & ChatGPT</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Screen OCR + ChatGPT</title>
+    <style>
+      body {
+        min-width: 300px;
+        min-height: 250px; /* Increased height to accommodate dropdown */
+        font-family: Arial, sans-serif;
+        margin: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      button {
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .checkbox-group,
+      .dropdown-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .checkbox-group input,
+      .dropdown-group select {
+        /* Removed fixed width and height */
+        padding: 5px 10px; /* Added padding for better visibility */
+        font-size: 14px; /* Ensured readable font size */
+        min-height: 30px; /* Set a minimum height */
+        box-sizing: border-box; /* Ensure padding is included in height */
+      }
+      #status {
+        font-weight: bold;
+      }
+      label {
+        font-size: 14px;
+      }
+      /* Optional: Enhance the appearance of the dropdown */
+      .dropdown-group select {
+        padding: 5px;
+        font-size: 14px;
+        width: 150px; /* Adjust width as needed */
+      }
+    </style>
+  </head>
+  <body>
+    <h1>OCR & ChatGPT</h1>
 
-  <!-- Dropdown for GPT Model Selection -->
-  <div class="dropdown-group">
-    <label for="model-select">Change GPT Model:</label>
-    <select id="model-select">
-      <option value="gpt-4o">GPT-4o</option>
-      <option value="gpt-4o-mini">GPT-4o-mini</option>
-      <!-- Add more models as needed -->
-    </select>
-  </div>
+    <!-- Dropdown for GPT Model Selection -->
+    <div class="dropdown-group">
+      <label for="model-select">Change GPT Model:</label>
+      <select id="model-select">
+        <option value="gpt-4o">GPT-4o</option>
+        <option value="gpt-4o-mini">GPT-4o-mini</option>
+        <!-- Add more models as needed -->
+      </select>
+    </div>
 
-  <!-- Start Selection Button -->
-  <button id="start-selection" disabled>Start OCR Selection</button>
+    <!-- Start Selection Button -->
+    <button id="start-selection" disabled>Start OCR Selection</button>
 
-  <!-- Options -->
-  <div class="checkbox-group">
-    <input type="checkbox" id="toggle-open-screenshot" />
-    <label for="toggle-open-screenshot">Open screenshot in new tab</label>
-  </div>
+    <!-- Options -->
+    <div class="checkbox-group">
+      <input type="checkbox" id="toggle-open-screenshot" />
+      <label for="toggle-open-screenshot">Open screenshot in new tab</label>
+    </div>
 
-  <div class="checkbox-group">
-    <input type="checkbox" id="toggle-open-ocr-text" />
-    <label for="toggle-open-ocr-text">Open OCR text in new tab</label>
-  </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="toggle-open-ocr-text" />
+      <label for="toggle-open-ocr-text">Open OCR text in new tab</label>
+    </div>
 
-  <!-- Status Message -->
-  <span id="status" style="color: red;">Loading Tesseract...</span>
+    <!-- Status Message -->
+    <span id="status" style="color: red">Loading Tesseract...</span>
 
-  <script src="popup.js"></script>
-</body>
+    <script src="popup.js"></script>
+  </body>
 </html>
