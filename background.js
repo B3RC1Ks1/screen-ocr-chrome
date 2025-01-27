@@ -61,7 +61,7 @@ const handleSendOcrText = async (request, sendResponse) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: `If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text.\n${text}`
+        message: `If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration\n${text}`
       }),
     });
 
