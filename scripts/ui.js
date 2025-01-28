@@ -47,54 +47,77 @@ const UI = (() => {
   };
 
   /**
-   * Display the ChatGPT response discretely and close on any click
+   * Display the ChatGPT response discreetly based on Stealth Mode
    * @param {string} answer - The response from ChatGPT
+   * @param {boolean} stealthMode - Whether Stealth Mode is enabled
    */
-  const displayChatGptResponse = (answer) => {
+  const displayChatGptResponse = (answer, stealthMode) => {
     // Prevent multiple overlays
     if (document.getElementById("chatgpt-response-overlay")) return;
 
-    // Create a transparent full-page overlay
+    // Create an overlay
     const overlay = document.createElement("div");
     overlay.id = "chatgpt-response-overlay";
-    Object.assign(overlay.style, {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      backgroundColor: "rgba(0, 0, 0, 0.0)",
-      zIndex: 1000001,
-      cursor: "pointer",
-    });
 
-    // Create a content container
-    const container = document.createElement("div");
-    Object.assign(container.style, {
-      position: "absolute",
-      bottom: "10px",
-      right: "50px",
-      width: "300px",
-      pointerEvents: "none", // allow clicks to pass through
-      backgroundColor: "white",
-      padding: "10px",
-      borderRadius: "8px",
-      boxShadow: "0 0 10px rgba(0,0,0,0.3)",
-    });
+    // Set styles based on Stealth Mode
+    if (stealthMode) {
+      Object.assign(overlay.style, {
+        position: "fixed",
+        bottom: "10px", // Retain original position
+        right: "50px",  // Retain original position
+        width: "200px",
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        padding: "5px",
+        borderRadius: "4px",
+        boxShadow: "0 0 5px rgba(0,0,0,0.2)",
+        opacity: "0.7",
+        transition: "opacity 0.3s ease",
+        zIndex: 1000001,
+        pointerEvents: "none", // Allow clicks to pass through
+        fontSize: "12px", // Smaller font for discretion
+      });
 
-    // Click anywhere to remove
-    overlay.addEventListener("click", () => {
-      overlay.remove();
-    });
+      // Add content
+      const content = document.createElement("div");
+      content.innerHTML = `
+          <p style="margin: 0;">${sanitizeHtml(answer)}</p>
+        `;
+      overlay.appendChild(content);
+      document.body.appendChild(overlay);
 
-    // Add content
-    const content = document.createElement("div");
-    content.innerHTML = `
-        <p style="margin: 0;">${sanitizeHtml(answer)}</p>
-      `;
-    container.appendChild(content);
-    overlay.appendChild(container);
-    document.body.appendChild(overlay);
+      // Automatically remove the overlay after a short duration in Stealth Mode
+      setTimeout(() => {
+        overlay.style.opacity = "0";
+        setTimeout(() => overlay.remove(), 300);
+      }, 3000); // Display for 3 seconds
+    } else {
+      Object.assign(overlay.style, {
+        position: "fixed",
+        bottom: "10px", // Original position
+        right: "50px",  // Original position
+        width: "300px",
+        backgroundColor: "white",
+        padding: "10px",
+        borderRadius: "8px",
+        boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+        zIndex: 1000001,
+        cursor: "pointer", // Indicate clickable
+        fontSize: "14px", // Standard font size
+      });
+
+      // Click anywhere on the overlay to remove it
+      overlay.addEventListener("click", () => {
+        overlay.remove();
+      });
+
+      // Add content
+      const content = document.createElement("div");
+      content.innerHTML = `
+          <p style="margin: 0;">${sanitizeHtml(answer)}</p>
+        `;
+      overlay.appendChild(content);
+      document.body.appendChild(overlay);
+    }
   };
 
   /**

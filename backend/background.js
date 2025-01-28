@@ -53,7 +53,7 @@ const handleSelectionComplete = (request, sendResponse) => {
  * @param {Function} sendResponse - The response callback.
  */
 const handleSendOcrText = async (request, sendResponse) => {
-  const { text } = request;
+  const { text, stealthMode } = request;
   if (!text) {
     sendResponse({ error: "No text provided for OCR processing." });
     return;
@@ -85,7 +85,7 @@ const handleSendOcrText = async (request, sendResponse) => {
       const data = await response.json();
 
       if (data?.response) {
-        sendResponse({ answer: data.response });
+        sendResponse({ answer: data.response, stealthMode });
       } else {
         throw new Error("Invalid response structure from server.");
       }
@@ -117,8 +117,8 @@ chrome.commands.onCommand.addListener(async (command) => {
 
       // Retrieve saved settings
       chrome.storage.local.get(
-        ["openScreenshot", "openOcrText"],
-        ({ openScreenshot, openOcrText }) => {
+        ["openScreenshot", "openOcrText", "stealthMode"],
+        ({ openScreenshot, openOcrText, stealthMode }) => {
           // Send a message to the content script to begin the overlay selection
           chrome.tabs.sendMessage(
             activeTab.id,
@@ -127,6 +127,7 @@ chrome.commands.onCommand.addListener(async (command) => {
               openScreenshot:
                 openScreenshot !== undefined ? openScreenshot : true,
               openOcrText: openOcrText !== undefined ? openOcrText : true,
+              stealthMode: stealthMode !== undefined ? stealthMode : false, // Include Stealth Mode flag
             },
             (response) => {
               if (chrome.runtime.lastError) {

@@ -3,21 +3,39 @@
 const SelectionOverlay = (() => {
   /**
    * Create a full-page overlay for drag-selection.
+   * @param {boolean} stealthMode - Whether Stealth Mode is enabled
    * @returns {HTMLDivElement} The overlay element.
    */
-  const createSelectionOverlay = () => {
+  const createSelectionOverlay = (stealthMode) => {
     const overlay = document.createElement("div");
     overlay.id = "my-ocr-overlay";
-    Object.assign(overlay.style, {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      background: "rgba(0, 0, 0, 0.2)",
-      cursor: "crosshair",
-      zIndex: 999999,
-    });
+
+    // Set styles based on Stealth Mode
+    if (stealthMode) {
+      Object.assign(overlay.style, {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        background: "rgba(0, 0, 0, 0.02)", // Further reduced dimming
+        cursor: "default", // Removed crosshair
+        zIndex: 999999,
+        transition: "background 0.1s ease", // Smooth transition
+      });
+    } else {
+      Object.assign(overlay.style, {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        background: "rgba(0, 0, 0, 0.2)", // Standard dimming
+        cursor: "crosshair", // Crosshair in Normal mode
+        zIndex: 999999,
+      });
+    }
+
     document.body.appendChild(overlay);
     return overlay;
   };
@@ -25,8 +43,9 @@ const SelectionOverlay = (() => {
   /**
    * Initialize mouse event handlers on the overlay for selection.
    * @param {HTMLDivElement} overlay - The overlay element.
+   * @param {boolean} stealthMode - Whether Stealth Mode is enabled
    */
-  const initSelectionHandlers = (overlay) => {
+  const initSelectionHandlers = (overlay, stealthMode) => {
     const onMouseDown = (e) => {
       if (e.button !== 0) return; // Only respond to left-click
       e.preventDefault();
@@ -42,15 +61,30 @@ const SelectionOverlay = (() => {
 
       // Create the selection rectangle
       const selectionRect = document.createElement("div");
-      Object.assign(selectionRect.style, {
-        position: "fixed",
-        border: "2px dashed #000",
-        backgroundColor: "rgba(255, 255, 255, 0.3)",
-        left: `${e.clientX}px`,
-        top: `${e.clientY}px`,
-        zIndex: 1000000,
-        pointerEvents: "none", // Allow mouse events to pass through
-      });
+      if (stealthMode) {
+        // Minimalist selection indicator without grid lines
+        Object.assign(selectionRect.style, {
+          position: "fixed",
+          border: "1px solid rgba(255, 255, 255, 0.1)", // Barely visible border
+          backgroundColor: "rgba(255, 255, 255, 0.05)", // Very faint background
+          left: `${e.clientX}px`,
+          top: `${e.clientY}px`,
+          zIndex: 1000000,
+          pointerEvents: "none", // Allow mouse events to pass through
+        });
+      } else {
+        // Standard selection indicator with grid lines
+        Object.assign(selectionRect.style, {
+          position: "fixed",
+          border: "2px dashed #000",
+          backgroundColor: "rgba(255, 255, 255, 0.3)",
+          left: `${e.clientX}px`,
+          top: `${e.clientY}px`,
+          zIndex: 1000000,
+          pointerEvents: "none", // Allow mouse events to pass through
+        });
+      }
+
       document.body.appendChild(selectionRect);
       State.setState({
         selection: { ...State.getState().selection, selectionRect },
@@ -117,7 +151,7 @@ const SelectionOverlay = (() => {
     // Get the bounding rectangle of the selection
     const rect = currentState.selection.selectionRect.getBoundingClientRect();
     const coords = {
-      // Remove window.scrollX and window.scrollY to keep coordinates relative to the viewport
+      // Keep coordinates relative to the viewport
       x: rect.left,
       y: rect.top,
       width: rect.width,
@@ -141,13 +175,18 @@ const SelectionOverlay = (() => {
         const croppedDataUrl = await cropScreenshot(screenshotBase64, coords);
         Logger.log("Cropped screenshot:", croppedDataUrl);
 
-        // Optionally open the screenshot in a new tab
-        if (currentState.openScreenshot) {
-          UI.openImageInNewTab(croppedDataUrl);
-        }
+        // Retrieve stealthMode setting
+        chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
+          const isStealthMode = stealthMode || false;
 
-        // Perform OCR on the cropped image
-        OCR.ocrScreenshot(croppedDataUrl);
+          // Optionally open the screenshot in a new tab (disabled in Stealth Mode)
+          if (currentState.openScreenshot && !isStealthMode) {
+            UI.openImageInNewTab(croppedDataUrl);
+          }
+
+          // Perform OCR on the cropped image
+          OCR.ocrScreenshot(croppedDataUrl);
+        });
       } else {
         Logger.error("No screenshot data received from background script.");
       }

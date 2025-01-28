@@ -2,21 +2,19 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const startSelectionBtn = document.getElementById("start-selection");
-  const openScreenshotCheckbox = document.getElementById(
-    "toggle-open-screenshot"
-  );
-  const openOcrTextCheckbox = document.getElementById("toggle-open-ocr-text"); // Existing Checkbox
-  const modelSelect = document.getElementById("model-select"); // Dropdown
+  const openScreenshotCheckbox = document.getElementById("toggle-open-screenshot");
+  const openOcrTextCheckbox = document.getElementById("toggle-open-ocr-text");
+  const stealthModeCheckbox = document.getElementById("toggle-stealth-mode"); // New Checkbox
+  const modelSelect = document.getElementById("model-select");
   const statusSpan = document.getElementById("status");
 
   // Load saved settings from chrome.storage.local
   chrome.storage.local.get(
-    ["openScreenshot", "openOcrText", "selectedModel"],
-    ({ openScreenshot, openOcrText, selectedModel }) => {
-      openScreenshotCheckbox.checked =
-        openScreenshot !== undefined ? openScreenshot : false;
-      openOcrTextCheckbox.checked =
-        openOcrText !== undefined ? openOcrText : false;
+    ["openScreenshot", "openOcrText", "selectedModel", "stealthMode"],
+    ({ openScreenshot, openOcrText, selectedModel, stealthMode }) => {
+      openScreenshotCheckbox.checked = openScreenshot !== undefined ? openScreenshot : false;
+      openOcrTextCheckbox.checked = openOcrText !== undefined ? openOcrText : false;
+      stealthModeCheckbox.checked = stealthMode !== undefined ? stealthMode : false; // Set Stealth Mode
       modelSelect.value = selectedModel || "gpt-4o"; // Set default model if not set
     }
   );
@@ -26,7 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const settings = {
       openScreenshot: openScreenshotCheckbox.checked,
       openOcrText: openOcrTextCheckbox.checked,
-      selectedModel: modelSelect.value, // Save selected model
+      stealthMode: stealthModeCheckbox.checked, // Save Stealth Mode
+      selectedModel: modelSelect.value,
     };
     chrome.storage.local.set(settings, () => {
       console.log("Settings saved:", settings);
@@ -35,10 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   openScreenshotCheckbox.addEventListener("change", saveSettings);
   openOcrTextCheckbox.addEventListener("change", saveSettings);
-  modelSelect.addEventListener("change", saveSettings); // Listen for dropdown changes
+  stealthModeCheckbox.addEventListener("change", saveSettings); // Listen for Stealth Mode changes
+  modelSelect.addEventListener("change", saveSettings);
 
-  // 1. Check if Tesseract is loaded in the current active tab's content script.
-  //    We'll send a message: { action: "check-tesseract-ready" }.
+  // Check if Tesseract is loaded in the current active tab's content script.
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const activeTabId = tabs[0].id;
 
@@ -46,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
       activeTabId,
       { action: "check-tesseract-ready" },
       (response) => {
-        // If there's an error or no content script, we'll see an error in chrome.runtime.lastError.
         if (chrome.runtime.lastError) {
           console.error(
             "No content script found or error:",
@@ -57,7 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // If the content script responds with tesseractReady = true
         if (response && response.tesseractReady === true) {
           statusSpan.textContent = "Tesseract ready!";
           statusSpan.style.color = "green";
@@ -71,27 +68,29 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   });
 
-  // 2. When the user clicks "Start OCR Selection"
+  // When the user clicks "Start OCR Selection"
   startSelectionBtn.addEventListener("click", () => {
-    // Read whether user wants to open screenshot in new tab
-    const openScreenshot = openScreenshotCheckbox.checked;
+    // Read the Stealth Mode setting
+    chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
+      const isStealthMode = stealthMode || false;
 
-    // Read whether user wants to open OCR text in new tab
-    const openOcrText = openOcrTextCheckbox.checked;
+      // Read other settings
+      const openScreenshot = openScreenshotCheckbox.checked;
+      const openOcrText = openOcrTextCheckbox.checked;
+      const selectedModel = modelSelect.value;
 
-    // Read the selected GPT model
-    const selectedModel = modelSelect.value;
+      // Send a message to the content script to begin the overlay selection
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "start-ocr-selection",
+          openScreenshot: openScreenshot,
+          openOcrText: openOcrText,
+          stealthMode: isStealthMode, // Include Stealth Mode flag
+        });
 
-    // Send a message to the content script to begin the overlay selection
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        action: "start-ocr-selection",
-        openScreenshot: openScreenshot,
-        openOcrText: openOcrText,
+        // Optionally close the popup to prevent blocking
+        window.close();
       });
-
-      // Optionally close the popup so it doesn't block screen area
-      window.close();
     });
   });
 });
