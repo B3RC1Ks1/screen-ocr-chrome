@@ -3,6 +3,74 @@
 const SERVER_URL = "https://screen-ocr-chrome.onrender.com/chat";
 
 /**
+ * Background Logger Module
+ */
+const BackgroundLogger = (() => {
+  let isStealthMode = false;
+
+  /**
+   * Initialize the Logger by fetching the Stealth Mode setting.
+   */
+  const initialize = () => {
+    chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
+      isStealthMode = stealthMode || false;
+      logInitialization();
+    });
+  };
+
+  /**
+   * Log initial stealth mode status for debugging.
+   * This log will always appear regardless of Stealth Mode to help with debugging.
+   */
+  const logInitialization = () => {
+    console.log(`[BG LOG INIT]: Stealth Mode is ${isStealthMode ? "ENABLED" : "DISABLED"}`);
+  };
+
+  /**
+   * Optionally, allow dynamic updating of Stealth Mode.
+   * This can be called whenever the Stealth Mode setting changes.
+   * @param {boolean} stealth - Current Stealth Mode status.
+   */
+  const setStealthMode = (stealth) => {
+    isStealthMode = stealth;
+  };
+
+  const log = (message, ...args) => {
+    if (!isStealthMode) {
+      console.log(`[BG LOG]: ${message}`, ...args);
+    }
+  };
+
+  const error = (message, ...args) => {
+    if (!isStealthMode) {
+      console.error(`[BG ERROR]: ${message}`, ...args);
+    }
+  };
+
+  const warn = (message, ...args) => {
+    if (!isStealthMode) {
+      console.warn(`[BG WARN]: ${message}`, ...args);
+    }
+  };
+
+  // Initialize Logger on script load
+  initialize();
+
+  // Listen for changes in Stealth Mode setting
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes.stealthMode) {
+      setStealthMode(changes.stealthMode.newValue);
+    }
+  });
+
+  return {
+    log,
+    error,
+    warn,
+  };
+})();
+
+/**
  * Handles messages from content scripts and popup.
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -16,7 +84,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true; // Indicates async response
 
     default:
-      console.warn("Unknown action received in background:", request.action);
+      BackgroundLogger.warn("Unknown action received in background:", request.action);
       sendResponse({ error: "Unknown action." });
       return false;
   }
@@ -28,9 +96,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
  * @param {Function} sendResponse - The response callback.
  */
 const handleSelectionComplete = (request, sendResponse) => {
+  BackgroundLogger.log("Handling 'selection-complete' action.");
   chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
     if (chrome.runtime.lastError) {
-      console.error(
+      BackgroundLogger.error(
         "Error capturing visible tab:",
         chrome.runtime.lastError.message
       );
@@ -41,7 +110,7 @@ const handleSelectionComplete = (request, sendResponse) => {
     if (dataUrl) {
       sendResponse({ screenshotBase64: dataUrl });
     } else {
-      console.error("No data URL received from captureVisibleTab.");
+      BackgroundLogger.error("No data URL received from captureVisibleTab.");
       sendResponse({ error: "Failed to capture screenshot." });
     }
   });
@@ -55,6 +124,7 @@ const handleSelectionComplete = (request, sendResponse) => {
 const handleSendOcrText = async (request, sendResponse) => {
   const { text, stealthMode } = request;
   if (!text) {
+    BackgroundLogger.warn("No text provided for OCR processing.");
     sendResponse({ error: "No text provided for OCR processing." });
     return;
   }
@@ -91,7 +161,7 @@ const handleSendOcrText = async (request, sendResponse) => {
       }
     });
   } catch (error) {
-    console.error("Error communicating with server:", error);
+    BackgroundLogger.error("Error communicating with server:", error);
     sendResponse({ error: error.message });
   }
 };
@@ -101,7 +171,7 @@ const handleSendOcrText = async (request, sendResponse) => {
  */
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === "start-ocr-selection") {
-    console.log("Keyboard shortcut triggered: Start OCR Selection");
+    BackgroundLogger.log("Keyboard shortcut triggered: Start OCR Selection");
 
     try {
       // Get the active tab
@@ -111,7 +181,7 @@ chrome.commands.onCommand.addListener(async (command) => {
       });
 
       if (!activeTab.id) {
-        console.error("No active tab found.");
+        BackgroundLogger.error("No active tab found.");
         return;
       }
 
@@ -131,19 +201,19 @@ chrome.commands.onCommand.addListener(async (command) => {
             },
             (response) => {
               if (chrome.runtime.lastError) {
-                console.error(
+                BackgroundLogger.error(
                   "Error sending message to content script:",
                   chrome.runtime.lastError.message
                 );
               } else {
-                console.log("OCR selection started via keyboard shortcut.");
+                BackgroundLogger.log("OCR selection started via keyboard shortcut.");
               }
             }
           );
         }
       );
     } catch (error) {
-      console.error("Error handling keyboard shortcut:", error);
+      BackgroundLogger.error("Error handling keyboard shortcut:", error);
     }
   }
 });

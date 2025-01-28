@@ -16,6 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
       openOcrTextCheckbox.checked = openOcrText !== undefined ? openOcrText : false;
       stealthModeCheckbox.checked = stealthMode !== undefined ? stealthMode : false; // Set Stealth Mode
       modelSelect.value = selectedModel || "gpt-4o"; // Set default model if not set
+
+      // Update Logger's Stealth Mode immediately
+      Logger.setStealthMode(stealthMode || false);
     }
   );
 
@@ -28,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
       selectedModel: modelSelect.value,
     };
     chrome.storage.local.set(settings, () => {
-      console.log("Settings saved:", settings);
+      Logger.log("Settings saved:", settings);
     });
   };
 
@@ -46,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { action: "check-tesseract-ready" },
       (response) => {
         if (chrome.runtime.lastError) {
-          console.error(
+          Logger.error(
             "No content script found or error:",
             chrome.runtime.lastError.message
           );
