@@ -59,29 +59,27 @@ const UI = (() => {
     const overlay = document.createElement("div");
     overlay.id = "chatgpt-response-overlay";
 
-    // Set styles based on Stealth Mode
     if (stealthMode) {
+      // Stealth Mode: Small, borderless, barely visible text in the corner
       Object.assign(overlay.style, {
         position: "fixed",
-        bottom: "10px", // Retain original position
-        right: "50px",  // Retain original position
-        width: "200px",
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        padding: "5px",
-        borderRadius: "4px",
-        boxShadow: "0 0 5px rgba(0,0,0,0.2)",
-        opacity: "0.7",
-        transition: "opacity 0.3s ease",
+        bottom: "10px", // Position in the bottom-right corner
+        right: "10px",
+        color: "rgba(0, 0, 0, 0.6)", // Black color with slight opacity
+        backgroundColor: "transparent", // No background
+        padding: "2px 4px", // Minimal padding
+        border: "none", // No border
+        borderRadius: "0px", // No border radius
+        fontSize: "10px", // Very small font size
+        fontFamily: "Arial, sans-serif",
         zIndex: 1000001,
         pointerEvents: "none", // Allow clicks to pass through
-        fontSize: "12px", // Smaller font for discretion
+        whiteSpace: "pre-wrap", // Preserve formatting
       });
 
       // Add content
-      const content = document.createElement("div");
-      content.innerHTML = `
-          <p style="margin: 0;">${sanitizeHtml(answer)}</p>
-        `;
+      const content = document.createElement("span");
+      content.textContent = answer; // Use textContent to prevent HTML injection
       overlay.appendChild(content);
       document.body.appendChild(overlay);
 
@@ -91,10 +89,11 @@ const UI = (() => {
         setTimeout(() => overlay.remove(), 300);
       }, 3000); // Display for 3 seconds
     } else {
+      // Normal Mode: Standard overlay with borders and background
       Object.assign(overlay.style, {
         position: "fixed",
         bottom: "10px", // Original position
-        right: "50px",  // Original position
+        right: "50px",
         width: "300px",
         backgroundColor: "white",
         padding: "10px",
@@ -103,6 +102,7 @@ const UI = (() => {
         zIndex: 1000001,
         cursor: "pointer", // Indicate clickable
         fontSize: "14px", // Standard font size
+        fontFamily: "Arial, sans-serif",
       });
 
       // Click anywhere on the overlay to remove it
