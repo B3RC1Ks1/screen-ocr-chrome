@@ -9,7 +9,6 @@ const Logger = (() => {
   const initialize = () => {
     chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
       isStealthMode = stealthMode || false;
-      logInitialization();
     });
   };
 
