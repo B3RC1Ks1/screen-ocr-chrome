@@ -39,4 +39,11 @@ const Logger = (function () {
   };
 })();
 
-window.Logger = Logger;
+if (typeof globalThis !== "undefined") {
+  globalThis.Logger = Logger;
+} else if (typeof self !== "undefined") {
+  self.Logger = Logger;
+} else if (typeof window !== "undefined") {
+  window.Logger = Logger;
+}
+
