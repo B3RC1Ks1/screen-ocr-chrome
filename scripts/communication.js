@@ -8,9 +8,13 @@ const Communication = (() => {
   const sendOcrTextToBackground = (text) => {
     return new Promise((resolve) => {
       // Retrieve stealthMode setting
-      chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
+      chrome.storage.local.get(["stealthMode"], (settings) => {
+        let stealthMode = settings.stealthMode;
+        if (stealthMode === undefined) {
+          stealthMode = false;
+        }
         chrome.runtime.sendMessage(
-          { action: "send-ocr-text", text, stealthMode },
+          { action: "send-ocr-text", text: text, stealthMode: stealthMode },
           (response) => {
             if (chrome.runtime.lastError) {
               Logger.error(
@@ -21,10 +25,10 @@ const Communication = (() => {
               return;
             }
 
-            if (response?.answer) {
+            if (response && response.answer) {
               Logger.log("Received answer from OpenAI:", response.answer);
               UI.displayChatGptResponse(response.answer, stealthMode);
-            } else if (response?.error) {
+            } else if (response && response.error) {
               Logger.error("Error from background script:", response.error);
             } else {
               Logger.error("No response received from background script.");
@@ -42,9 +46,13 @@ const Communication = (() => {
    */
   const captureScreenshot = (coords) => {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
+      chrome.storage.local.get(["stealthMode"], (settings) => {
+        let stealthMode = settings.stealthMode;
+        if (stealthMode === undefined) {
+          stealthMode = false;
+        }
         chrome.runtime.sendMessage(
-          { action: "selection-complete", coords, stealthMode },
+          { action: "selection-complete", coords: coords, stealthMode: stealthMode },
           (response) => {
             if (chrome.runtime.lastError) {
               Logger.error(
@@ -55,7 +63,7 @@ const Communication = (() => {
               return;
             }
 
-            if (response?.screenshotBase64) {
+            if (response && response.screenshotBase64) {
               resolve(response);
             } else {
               Logger.error("No data URL received from captureVisibleTab.");
@@ -79,19 +87,35 @@ const Communication = (() => {
 
         case "start-ocr-selection":
           Logger.log("[Content Script] Starting OCR Selection");
+
+          let openScreenshot = message.openScreenshot;
+          if (openScreenshot === undefined) {
+            openScreenshot = false;
+          }
+          let openOcrText = message.openOcrText;
+          if (openOcrText === undefined) {
+            openOcrText = false;
+          }
+          let stealthMode = message.stealthMode;
+          if (stealthMode === undefined) {
+            stealthMode = false;
+          }
+
           State.setState({
-            openScreenshot: message.openScreenshot || false,
-            openOcrText: message.openOcrText || false,
-            stealthMode: message.stealthMode || false, // Set Stealth Mode
+            openScreenshot: openScreenshot,
+            openOcrText: openOcrText,
+            stealthMode: stealthMode,
           });
 
           // Remove any existing overlay to prevent duplicates
           const existingOverlay = document.getElementById("my-ocr-overlay");
-          if (existingOverlay) existingOverlay.remove();
+          if (existingOverlay) {
+            existingOverlay.remove();
+          }
 
           // Create a new overlay and initialize selection handlers
-          const overlay = SelectionOverlay.createSelectionOverlay(message.stealthMode);
-          SelectionOverlay.initSelectionHandlers(overlay, message.stealthMode);
+          const overlay = SelectionOverlay.createSelectionOverlay(stealthMode);
+          SelectionOverlay.initSelectionHandlers(overlay, stealthMode);
           sendResponse({ status: "Selection overlay started." });
           break;
 

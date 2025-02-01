@@ -1,4 +1,4 @@
-// background.js
+// /backend/background.js
 
 const SERVER_URL = "http://localhost:9005/chat";
 
@@ -12,8 +12,12 @@ const BackgroundLogger = (() => {
    * Initialize the Logger by fetching the Stealth Mode setting.
    */
   const initialize = () => {
-    chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
-      isStealthMode = stealthMode || false;
+    chrome.storage.local.get(["stealthMode"], (settings) => {
+      let storedStealthMode = settings.stealthMode;
+      if (storedStealthMode === undefined) {
+        storedStealthMode = false;
+      }
+      isStealthMode = storedStealthMode;
       logInitialization();
     });
   };
@@ -23,7 +27,9 @@ const BackgroundLogger = (() => {
    * This log will always appear regardless of Stealth Mode to help with debugging.
    */
   const logInitialization = () => {
-    console.log(`[BG LOG INIT]: Stealth Mode is ${isStealthMode ? "ENABLED" : "DISABLED"}`);
+    console.log(
+      `[BG LOG INIT]: Stealth Mode is ${isStealthMode ? "ENABLED" : "DISABLED"}`
+    );
   };
 
   /**
@@ -131,8 +137,11 @@ const handleSendOcrText = async (request, sendResponse) => {
 
   try {
     // Retrieve the selected model from storage
-    chrome.storage.local.get(["selectedModel"], async ({ selectedModel }) => {
-      const model = selectedModel || "gpt-4o"; // Default model if not set
+    chrome.storage.local.get(["selectedModel"], async (settings) => {
+      let model = settings.selectedModel;
+      if (model === undefined || model === null || model === "") {
+        model = "gpt-4o"; // Default model if not set
+      }
 
       const response = await fetch(SERVER_URL, {
         method: "POST",
@@ -140,7 +149,9 @@ const handleSendOcrText = async (request, sendResponse) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: `If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration\n${text}`,
+          message:
+            "If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration\n" +
+            text,
           model: model, // Include the selected model
         }),
       });
@@ -154,7 +165,7 @@ const handleSendOcrText = async (request, sendResponse) => {
 
       const data = await response.json();
 
-      if (data?.response) {
+      if (data && data.response) {
         sendResponse({ answer: data.response, stealthMode });
       } else {
         throw new Error("Invalid response structure from server.");
@@ -180,7 +191,7 @@ chrome.commands.onCommand.addListener(async (command) => {
         currentWindow: true,
       });
 
-      if (!activeTab.id) {
+      if (!activeTab || !activeTab.id) {
         BackgroundLogger.error("No active tab found.");
         return;
       }
@@ -188,16 +199,28 @@ chrome.commands.onCommand.addListener(async (command) => {
       // Retrieve saved settings
       chrome.storage.local.get(
         ["openScreenshot", "openOcrText", "stealthMode"],
-        ({ openScreenshot, openOcrText, stealthMode }) => {
+        (settings) => {
+          let openScreenshot = settings.openScreenshot;
+          if (openScreenshot === undefined) {
+            openScreenshot = true;
+          }
+          let openOcrText = settings.openOcrText;
+          if (openOcrText === undefined) {
+            openOcrText = true;
+          }
+          let stealthMode = settings.stealthMode;
+          if (stealthMode === undefined) {
+            stealthMode = false;
+          }
+
           // Send a message to the content script to begin the overlay selection
           chrome.tabs.sendMessage(
             activeTab.id,
             {
               action: "start-ocr-selection",
-              openScreenshot:
-                openScreenshot !== undefined ? openScreenshot : true,
-              openOcrText: openOcrText !== undefined ? openOcrText : true,
-              stealthMode: stealthMode !== undefined ? stealthMode : false, // Include Stealth Mode flag
+              openScreenshot: openScreenshot,
+              openOcrText: openOcrText,
+              stealthMode: stealthMode, // Include Stealth Mode flag
             },
             (response) => {
               if (chrome.runtime.lastError) {
