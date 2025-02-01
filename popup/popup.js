@@ -1,12 +1,12 @@
 // /popup/popup.js
 
 document.addEventListener("DOMContentLoaded", function () {
-  var startSelectionBtn = document.getElementById("start-selection");
-  var openScreenshotCheckbox = document.getElementById("toggle-open-screenshot");
-  var openOcrTextCheckbox = document.getElementById("toggle-open-ocr-text");
-  var stealthModeCheckbox = document.getElementById("toggle-stealth-mode");
-  var modelSelect = document.getElementById("model-select");
-  var statusSpan = document.getElementById("status");
+  const startSelectionBtn = document.getElementById("start-selection");
+  const openScreenshotCheckbox = document.getElementById("toggle-open-screenshot");
+  const openOcrTextCheckbox = document.getElementById("toggle-open-ocr-text");
+  const stealthModeCheckbox = document.getElementById("toggle-stealth-mode");
+  const modelSelect = document.getElementById("model-select");
+  const statusSpan = document.getElementById("status");
 
   // Load saved settings
   chrome.storage.local.get(["openScreenshot", "openOcrText", "selectedModel", "stealthMode"], function (settings) {
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Save settings when changed
   function saveSettings() {
-    var settings = {
+    const settings = {
       openScreenshot: openScreenshotCheckbox.checked,
       openOcrText: openOcrTextCheckbox.checked,
       stealthMode: stealthModeCheckbox.checked,
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
       statusSpan.style.color = "red";
       return;
     }
-    var activeTabId = tabs[0].id;
+    const activeTabId = tabs[0].id;
     chrome.tabs.sendMessage(activeTabId, { action: "check-tesseract-ready" }, function (response) {
       if (chrome.runtime.lastError) {
         Logger.error("No content script found or error: " + chrome.runtime.lastError.message);
@@ -85,14 +85,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Start OCR Selection on button click
   startSelectionBtn.addEventListener("click", function () {
     chrome.storage.local.get(["stealthMode"], function (settings) {
-      var isStealthMode;
+      let isStealthMode;
       if (settings.stealthMode !== undefined) {
         isStealthMode = settings.stealthMode;
       } else {
         isStealthMode = false;
       }
-      var openScreenshot = openScreenshotCheckbox.checked;
-      var openOcrText = openOcrTextCheckbox.checked;
+      const openScreenshot = openScreenshotCheckbox.checked;
+      const openOcrText = openOcrTextCheckbox.checked;
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs && tabs.length > 0) {
           chrome.tabs.sendMessage(tabs[0].id, {
@@ -107,5 +107,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
-
-

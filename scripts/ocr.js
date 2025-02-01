@@ -2,7 +2,7 @@
 
 const OCR = (function () {
   function ocrScreenshot(base64Image) {
-    var currentState = State.getState();
+    const currentState = State.getState();
     if (!currentState.tesseractReady || !window.Tesseract) {
       Logger.error("Tesseract.js is not loaded yet!");
       return;
@@ -13,8 +13,8 @@ const OCR = (function () {
       },
     })
       .then(function (result) {
-        var text = result.data.text;
-        var extractedText = text.trim();
+        const text = result.data.text;
+        const extractedText = text.trim();
         Logger.log("OCR recognized text: " + extractedText);
         if (currentState.openOcrText) {
           UI.openTextInNewTab(extractedText);

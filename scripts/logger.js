@@ -1,7 +1,7 @@
 // scripts/logger.js
 
 const Logger = (function () {
-  var isStealthMode = false;
+  let isStealthMode = false;
 
   chrome.storage.local.get(["stealthMode"], function (settings) {
     if (settings.stealthMode !== undefined) {
@@ -46,4 +46,5 @@ if (typeof globalThis !== "undefined") {
 } else if (typeof window !== "undefined") {
   window.Logger = Logger;
 }
+
 

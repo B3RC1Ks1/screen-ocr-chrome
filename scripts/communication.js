@@ -4,7 +4,7 @@ const Communication = (function () {
   function sendOcrTextToBackground(text) {
     return new Promise(function (resolve) {
       chrome.storage.local.get(["stealthMode"], function (settings) {
-        var stealthMode;
+        let stealthMode;
         if (settings.stealthMode !== undefined) {
           stealthMode = settings.stealthMode;
         } else {
@@ -33,7 +33,7 @@ const Communication = (function () {
   function captureScreenshot(coords) {
     return new Promise(function (resolve, reject) {
       chrome.storage.local.get(["stealthMode"], function (settings) {
-        var stealthMode;
+        let stealthMode;
         if (settings.stealthMode !== undefined) {
           stealthMode = settings.stealthMode;
         } else {
@@ -61,19 +61,19 @@ const Communication = (function () {
         sendResponse({ tesseractReady: State.getState().tesseractReady });
       } else if (message.action === "start-ocr-selection") {
         Logger.log("[Content Script] Starting OCR Selection");
-        var openScreenshot;
+        let openScreenshot;
         if (message.openScreenshot !== undefined) {
           openScreenshot = message.openScreenshot;
         } else {
           openScreenshot = false;
         }
-        var openOcrText;
+        let openOcrText;
         if (message.openOcrText !== undefined) {
           openOcrText = message.openOcrText;
         } else {
           openOcrText = false;
         }
-        var stealthMode;
+        let stealthMode;
         if (message.stealthMode !== undefined) {
           stealthMode = message.stealthMode;
         } else {
@@ -85,11 +85,11 @@ const Communication = (function () {
           stealthMode: stealthMode,
         });
         // Remove any existing overlay to prevent duplicates
-        var existingOverlay = document.getElementById("my-ocr-overlay");
+        const existingOverlay = document.getElementById("my-ocr-overlay");
         if (existingOverlay) {
           existingOverlay.remove();
         }
-        var overlay = SelectionOverlay.createSelectionOverlay(stealthMode);
+        const overlay = SelectionOverlay.createSelectionOverlay(stealthMode);
         SelectionOverlay.initSelectionHandlers(overlay, stealthMode);
         sendResponse({ status: "Selection overlay started." });
       } else {
@@ -108,5 +108,6 @@ const Communication = (function () {
 })();
 
 window.Communication = Communication;
+
 
 

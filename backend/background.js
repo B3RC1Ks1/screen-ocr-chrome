@@ -1,8 +1,7 @@
-// /backend/background.js
-
 importScripts("../scripts/logger.js");
 
 const SERVER_URL = "https://screen-ocr-chrome.onrender.com/chat";
+
 
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -37,15 +36,15 @@ function handleSelectionComplete(request, sendResponse) {
 }
 
 function handleSendOcrText(request, sendResponse) {
-  var text = request.text;
-  var stealthMode = request.stealthMode;
+  const text = request.text;
+  const stealthMode = request.stealthMode;
   if (!text) {
     Logger.warn("No text provided for OCR processing.");
     sendResponse({ error: "No text provided for OCR processing." });
     return;
   }
   chrome.storage.local.get(["selectedModel"], function (settings) {
-    var model;
+    let model;
     if (settings.selectedModel) {
       model = settings.selectedModel;
     } else {
@@ -67,7 +66,9 @@ function handleSendOcrText(request, sendResponse) {
         if (!response.ok) {
           return response.text().then(function (errorText) {
             Logger.error("Server error: " + response.status + " - " + errorText);
-            sendResponse({ error: "Server responded with status " + response.status + ": " + errorText, });
+            sendResponse({
+              error: "Server responded with status " + response.status + ": " + errorText,
+            });
           });
         }
         return response.json();
@@ -102,9 +103,9 @@ chrome.commands.onCommand.addListener(async function (command) {
       return;
     }
     chrome.storage.local.get(["openScreenshot", "openOcrText", "stealthMode"], function (settings) {
-      var openScreenshot = settings.openScreenshot !== undefined ? settings.openScreenshot : true;
-      var openOcrText = settings.openOcrText !== undefined ? settings.openOcrText : true;
-      var stealthMode = settings.stealthMode !== undefined ? settings.stealthMode : false;
+      const openScreenshot = settings.openScreenshot !== undefined ? settings.openScreenshot : true;
+      const openOcrText = settings.openOcrText !== undefined ? settings.openOcrText : true;
+      const stealthMode = settings.stealthMode !== undefined ? settings.stealthMode : false;
 
       chrome.tabs.sendMessage(
         activeTab.id,
@@ -125,6 +126,3 @@ chrome.commands.onCommand.addListener(async function (command) {
     });
   }
 });
-
-
-

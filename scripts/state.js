@@ -1,7 +1,7 @@
 // scripts/state.js
 
 const State = (function () {
-  var state = {
+  const state = {
     openScreenshot: false,
     openOcrText: false,
     tesseractReady: false,
@@ -29,5 +29,6 @@ const State = (function () {
 })();
 
 window.State = State;
+
 
 

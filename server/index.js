@@ -33,10 +33,10 @@ app.post("/chat", async function (req, res) {
   if (!message || typeof message !== "string") {
     return res.status(400).json({ error: 'A valid "message" field is required.' });
   }
-  var selectedModel;
+  let selectedModel;
   if (model) {
-    var modelAllowed = false;
-    for (var i = 0; i < ALLOWED_MODELS.length; i++) {
+    let modelAllowed = false;
+    for (let i = 0; i < ALLOWED_MODELS.length; i++) {
       if (ALLOWED_MODELS[i] === model) {
         modelAllowed = true;
         break;
@@ -62,7 +62,7 @@ app.post("/chat", async function (req, res) {
       temperature: 0.7,
       max_tokens: 150,
     });
-    var assistantMessage = "";
+    let assistantMessage = "";
     if (
       completion.choices &&
       completion.choices.length > 0 &&
@@ -90,4 +90,5 @@ const PORT = process.env.PORT || 9001;
 app.listen(PORT, function () {
   console.log("Server is running on port " + PORT);
 });
+
 

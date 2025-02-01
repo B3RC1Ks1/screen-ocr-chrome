@@ -2,9 +2,9 @@
 
 const UI = (function () {
   function openTextInNewTab(text) {
-    var textWin = window.open("", "_blank");
+    const textWin = window.open("", "_blank");
     if (textWin) {
-      var htmlContent =
+      const htmlContent =
         '<!DOCTYPE html><html><head><title>OCR Result</title></head><body style="margin:20px; font-family: sans-serif;"><h1>Extracted Text</h1><pre style="white-space: pre-wrap;">' +
         sanitizeHtml(text) +
         "</pre></body></html>";
@@ -16,9 +16,9 @@ const UI = (function () {
   }
 
   function openImageInNewTab(imageDataUrl) {
-    var newWin = window.open("", "_blank");
+    const newWin = window.open("", "_blank");
     if (newWin) {
-      var htmlContent =
+      const htmlContent =
         '<!DOCTYPE html><html><head><title>Screenshot</title></head><body style="margin:0;"><img src="' +
         imageDataUrl +
         '" alt="Cropped Screenshot" style="max-width:100%; height:auto;" /></body></html>';
@@ -31,7 +31,7 @@ const UI = (function () {
 
   function displayChatGptResponse(answer, stealthMode) {
     if (document.getElementById("chatgpt-response-overlay")) return;
-    var overlay = document.createElement("div");
+    const overlay = document.createElement("div");
     overlay.id = "chatgpt-response-overlay";
     if (stealthMode) {
       overlay.style.position = "fixed";
@@ -47,7 +47,7 @@ const UI = (function () {
       overlay.style.zIndex = "1000001";
       overlay.style.pointerEvents = "none";
       overlay.style.whiteSpace = "pre-wrap";
-      var content = document.createElement("span");
+      const content = document.createElement("span");
       content.textContent = answer;
       overlay.appendChild(content);
       document.body.appendChild(overlay);
@@ -73,7 +73,7 @@ const UI = (function () {
       overlay.addEventListener("click", function () {
         overlay.remove();
       });
-      var content = document.createElement("div");
+      const content = document.createElement("div");
       content.innerHTML = "<p style='margin: 0;'>" + sanitizeHtml(answer) + "</p>";
       overlay.appendChild(content);
       document.body.appendChild(overlay);
@@ -81,7 +81,7 @@ const UI = (function () {
   }
 
   function sanitizeHtml(html) {
-    var div = document.createElement("div");
+    const div = document.createElement("div");
     div.textContent = html;
     return div.innerHTML;
   }
@@ -94,5 +94,6 @@ const UI = (function () {
 })();
 
 window.UI = UI;
+
 
 

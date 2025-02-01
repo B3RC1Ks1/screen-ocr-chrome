@@ -8,7 +8,7 @@ const TesseractLoader = (function () {
         resolve();
         return;
       }
-      var script = document.createElement("script");
+      const script = document.createElement("script");
       script.src = chrome.runtime.getURL("lib/tesseract.min.js");
       script.onload = function () {
         if (window.Tesseract) {
