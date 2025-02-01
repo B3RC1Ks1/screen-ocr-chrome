@@ -57,7 +57,7 @@ function handleSendOcrText(request, sendResponse) {
       },
       body: JSON.stringify({
         message:
-          "If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration\n" +
+          "You will be provded a question. If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration. If you see task aims to complete incomplete sentences, just output missing words:\n" +
           text,
         model: model,
       }),
@@ -103,9 +103,27 @@ chrome.commands.onCommand.addListener(async function (command) {
       return;
     }
     chrome.storage.local.get(["openScreenshot", "openOcrText", "stealthMode"], function (settings) {
-      const openScreenshot = settings.openScreenshot !== undefined ? settings.openScreenshot : true;
-      const openOcrText = settings.openOcrText !== undefined ? settings.openOcrText : true;
-      const stealthMode = settings.stealthMode !== undefined ? settings.stealthMode : false;
+      let openScreenshot;
+      let openOcrText;
+      let stealthMode;
+    
+      if (settings.openScreenshot !== undefined) {
+        openScreenshot = settings.openScreenshot;
+      } else {
+        openScreenshot = true;
+      }
+    
+      if (settings.openOcrText !== undefined) {
+        openOcrText = settings.openOcrText;
+      } else {
+        openOcrText = true;
+      }
+    
+      if (settings.stealthMode !== undefined) {
+        stealthMode = settings.stealthMode;
+      } else {
+        stealthMode = false;
+      }
 
       chrome.tabs.sendMessage(
         activeTab.id,
