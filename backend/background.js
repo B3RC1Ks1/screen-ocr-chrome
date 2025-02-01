@@ -152,13 +152,13 @@ chrome.commands.onCommand.addListener(async function (command) {
       if (settings.openScreenshot !== undefined) {
         openScreenshot = settings.openScreenshot;
       } else {
-        openScreenshot = true;
+        openScreenshot = false;
       }
       var openOcrText;
       if (settings.openOcrText !== undefined) {
         openOcrText = settings.openOcrText;
       } else {
-        openOcrText = true;
+        openOcrText = false;
       }
       var stealthMode;
       if (settings.stealthMode !== undefined) {

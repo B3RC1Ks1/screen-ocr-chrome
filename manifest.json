@@ -44,8 +44,8 @@
   "commands": {
     "start-ocr-selection": {
       "suggested_key": {
-        "default": "Alt+X",
-        "mac": "Alt+X"
+        "default": "Alt+Z",
+        "mac": "Alt+Z"
       },
       "description": "Start OCR Selection"
     }
