@@ -1,69 +1,42 @@
 // scripts/logger.js
 
-const Logger = (() => {
-  let isStealthMode = false;
+const Logger = (function () {
+  var isStealthMode = false;
 
-  /**
-   * Initialize the Logger by fetching the Stealth Mode setting.
-   */
-  const initialize = () => {
-    chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
-      try {
-        isStealthMode = stealthMode || false;
-      } catch (error) {
-        console.error("Error initializing Logger:", error);
-        isStealthMode = false;
-      }
-    });
-  };
-
-  /**
-   * Update the stealth mode.
-   * @param {boolean} stealth - New stealth mode value.
-   */
-  const setStealthMode = (stealth) => {
-    isStealthMode = stealth;
-  };
-
-  const log = (message, ...args) => {
-    if (!isStealthMode) {
-      console.log(`[LOG]: ${message}`, ...args);
+  chrome.storage.local.get(["stealthMode"], function (settings) {
+    if (settings.stealthMode !== undefined) {
+      isStealthMode = settings.stealthMode;
+    } else {
+      isStealthMode = false;
     }
-  };
+  });
 
-  const error = (message, ...args) => {
-    if (!isStealthMode) {
-      console.error(`[ERROR]: ${message}`, ...args);
-    }
-  };
-
-  const warn = (message, ...args) => {
-    if (!isStealthMode) {
-      console.warn(`[WARN]: ${message}`, ...args);
-    }
-  };
-
-  // Initialize Logger on script load
-  initialize();
-
-  // Listen for changes in Stealth Mode setting
-  chrome.storage.onChanged.addListener((changes, area) => {
-    try {
-      if (area === "local" && changes.stealthMode) {
-        setStealthMode(changes.stealthMode.newValue);
-      }
-    } catch (error) {
-      console.error("Error handling storage change in Logger:", error);
+  chrome.storage.onChanged.addListener(function (changes, area) {
+    if (area === "local" && changes.stealthMode) {
+      isStealthMode = changes.stealthMode.newValue;
     }
   });
 
   return {
-    log,
-    error,
-    warn,
-    setStealthMode,
+    log: function (message) {
+      if (!isStealthMode) {
+        console.log("[LOG]: " + message);
+      }
+    },
+    error: function (message) {
+      if (!isStealthMode) {
+        console.error("[ERROR]: " + message);
+      }
+    },
+    warn: function (message) {
+      if (!isStealthMode) {
+        console.warn("[WARN]: " + message);
+      }
+    },
+    setStealthMode: function (stealth) {
+      isStealthMode = stealth;
+    },
   };
 })();
 
-// Make Logger available globally
 window.Logger = Logger;

@@ -1,7 +1,7 @@
 // scripts/state.js
 
-const State = (() => {
-  const state = {
+const State = (function () {
+  var state = {
     openScreenshot: false,
     openOcrText: false,
     tesseractReady: false,
@@ -13,17 +13,21 @@ const State = (() => {
     },
   };
 
-  const getState = () => ({ ...state });
-  const setState = (newState) => {
+  function getState() {
+    // Return a shallow copy of state
+    return Object.assign({}, state);
+  }
+
+  function setState(newState) {
     Object.assign(state, newState);
-  };
+  }
 
   return {
-    getState,
-    setState,
+    getState: getState,
+    setState: setState,
   };
 })();
 
-// Make State available globally
 window.State = State;
+
 

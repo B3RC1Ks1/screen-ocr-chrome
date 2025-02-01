@@ -1,57 +1,46 @@
 // scripts/tesseractLoader.js
 
-const TesseractLoader = (() => {
-  const loadTesseractScript = () => {
-    return new Promise((resolve, reject) => {
-      try {
-        if (window.Tesseract) {
-          Logger.log("Tesseract.js is already loaded.");
-          resolve();
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.src = chrome.runtime.getURL("lib/tesseract.min.js");
-
-        script.onload = () => {
-          try {
-            if (window.Tesseract) {
-              Logger.log("Tesseract.js loaded successfully.");
-              resolve();
-            } else {
-              reject(new Error("Tesseract.js did not initialize correctly."));
-            }
-          } catch (error) {
-            reject(new Error("Error in script.onload: " + error.message));
-          }
-        };
-
-        script.onerror = () => {
-          reject(new Error("Failed to load tesseract.min.js"));
-        };
-
-        document.head.appendChild(script);
-      } catch (error) {
-        reject(new Error("Error loading Tesseract script: " + error.message));
+const TesseractLoader = (function () {
+  function loadTesseractScript() {
+    return new Promise(function (resolve, reject) {
+      if (window.Tesseract) {
+        Logger.log("Tesseract.js is already loaded.");
+        resolve();
+        return;
       }
+      var script = document.createElement("script");
+      script.src = chrome.runtime.getURL("lib/tesseract.min.js");
+      script.onload = function () {
+        if (window.Tesseract) {
+          Logger.log("Tesseract.js loaded successfully.");
+          resolve();
+        } else {
+          reject(new Error("Tesseract.js did not initialize correctly."));
+        }
+      };
+      script.onerror = function () {
+        reject(new Error("Failed to load tesseract.min.js"));
+      };
+      document.head.appendChild(script);
     });
-  };
+  }
 
-  const initialize = async () => {
-    try {
-      await loadTesseractScript();
-      State.setState({ tesseractReady: true });
-      Logger.log("Tesseract.js is ready for use.");
-    } catch (error) {
-      Logger.error("Error loading Tesseract.js:", error);
-    }
-  };
+  function initialize() {
+    loadTesseractScript()
+      .then(function () {
+        State.setState({ tesseractReady: true });
+        Logger.log("Tesseract.js is ready for use.");
+      })
+      .catch(function (error) {
+        Logger.error("Error loading Tesseract.js: " + error.message);
+      });
+  }
 
   return {
-    initialize,
+    initialize: initialize,
   };
 })();
 
-// Initialize Tesseract when the script loads
 TesseractLoader.initialize();
+
 
