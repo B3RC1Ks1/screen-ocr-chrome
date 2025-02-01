@@ -2,8 +2,8 @@
 
 const OCR = (() => {
   /**
-   * Perform OCR on a Base64-encoded image using Tesseract.js
-   * @param {string} base64Image - DataURL of the cropped screenshot
+   * Perform OCR on a Base64-encoded image using Tesseract.js.
+   * @param {string} base64Image - DataURL of the cropped screenshot.
    */
   const ocrScreenshot = async (base64Image) => {
     const currentState = State.getState();
@@ -13,9 +13,7 @@ const OCR = (() => {
     }
 
     try {
-      const {
-        data: { text },
-      } = await window.Tesseract.recognize(base64Image, "eng+pol", {
+      const { data: { text } } = await window.Tesseract.recognize(base64Image, "eng+pol", {
         logger: (m) => Logger.log("[Tesseract progress]", m),
       });
 

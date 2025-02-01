@@ -8,14 +8,18 @@ const Logger = (() => {
    */
   const initialize = () => {
     chrome.storage.local.get(["stealthMode"], ({ stealthMode }) => {
-      isStealthMode = stealthMode || false;
+      try {
+        isStealthMode = stealthMode || false;
+      } catch (error) {
+        console.error("Error initializing Logger:", error);
+        isStealthMode = false;
+      }
     });
   };
 
   /**
-   * Optionally, allow dynamic updating of Stealth Mode.
-   * This can be called whenever the Stealth Mode setting changes.
-   * @param {boolean} stealth - Current Stealth Mode status.
+   * Update the stealth mode.
+   * @param {boolean} stealth - New stealth mode value.
    */
   const setStealthMode = (stealth) => {
     isStealthMode = stealth;
@@ -44,8 +48,12 @@ const Logger = (() => {
 
   // Listen for changes in Stealth Mode setting
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes.stealthMode) {
-      setStealthMode(changes.stealthMode.newValue);
+    try {
+      if (area === "local" && changes.stealthMode) {
+        setStealthMode(changes.stealthMode.newValue);
+      }
+    } catch (error) {
+      console.error("Error handling storage change in Logger:", error);
     }
   });
 
@@ -53,7 +61,7 @@ const Logger = (() => {
     log,
     error,
     warn,
-    setStealthMode, // Expose setter if needed elsewhere
+    setStealthMode,
   };
 })();
 

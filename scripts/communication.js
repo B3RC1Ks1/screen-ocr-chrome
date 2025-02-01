@@ -2,75 +2,80 @@
 
 const Communication = (() => {
   /**
-   * Send OCR text to the background script for processing with OpenAI
-   * @param {string} text - The extracted OCR text
+   * Send OCR text to the background script for processing with OpenAI.
+   * @param {string} text - The extracted OCR text.
    */
   const sendOcrTextToBackground = (text) => {
     return new Promise((resolve) => {
-      // Retrieve stealthMode setting
       chrome.storage.local.get(["stealthMode"], (settings) => {
-        let stealthMode = settings.stealthMode;
-        if (stealthMode === undefined) {
-          stealthMode = false;
-        }
-        chrome.runtime.sendMessage(
-          { action: "send-ocr-text", text: text, stealthMode: stealthMode },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              Logger.error(
-                "Error sending message to background script:",
-                chrome.runtime.lastError.message
-              );
-              resolve();
-              return;
-            }
-
-            if (response && response.answer) {
-              Logger.log("Received answer from OpenAI:", response.answer);
-              UI.displayChatGptResponse(response.answer, stealthMode);
-            } else if (response && response.error) {
-              Logger.error("Error from background script:", response.error);
-            } else {
-              Logger.error("No response received from background script.");
-            }
-            resolve();
+        try {
+          let stealthMode = settings.stealthMode;
+          if (stealthMode === undefined) {
+            stealthMode = false;
           }
-        );
+          chrome.runtime.sendMessage(
+            { action: "send-ocr-text", text: text, stealthMode: stealthMode },
+            (response) => {
+              try {
+                if (chrome.runtime.lastError) {
+                  throw new Error(chrome.runtime.lastError.message);
+                }
+                if (response && response.answer) {
+                  Logger.log("Received answer from OpenAI:", response.answer);
+                  UI.displayChatGptResponse(response.answer, stealthMode);
+                } else if (response && response.error) {
+                  Logger.error("Error from background script:", response.error);
+                } else {
+                  Logger.error("No response received from background script.");
+                }
+              } catch (error) {
+                Logger.error("Error processing background response:", error);
+              }
+              resolve();
+            }
+          );
+        } catch (error) {
+          Logger.error("Error in sendOcrTextToBackground:", error);
+          resolve();
+        }
       });
     });
   };
 
   /**
-   * Capture the visible tab via the background script
-   * @param {{x: number, y: number, width: number, height: number}} coords - The coordinates for cropping
+   * Capture the visible tab via the background script.
+   * @param {{x: number, y: number, width: number, height: number}} coords - Coordinates for cropping.
    */
   const captureScreenshot = (coords) => {
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(["stealthMode"], (settings) => {
-        let stealthMode = settings.stealthMode;
-        if (stealthMode === undefined) {
-          stealthMode = false;
-        }
-        chrome.runtime.sendMessage(
-          { action: "selection-complete", coords: coords, stealthMode: stealthMode },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              Logger.error(
-                "Error capturing screenshot:",
-                chrome.runtime.lastError.message
-              );
-              reject(new Error(chrome.runtime.lastError.message));
-              return;
-            }
-
-            if (response && response.screenshotBase64) {
-              resolve(response);
-            } else {
-              Logger.error("No data URL received from captureVisibleTab.");
-              reject(new Error("Failed to capture screenshot."));
-            }
+        try {
+          let stealthMode = settings.stealthMode;
+          if (stealthMode === undefined) {
+            stealthMode = false;
           }
-        );
+          chrome.runtime.sendMessage(
+            { action: "selection-complete", coords: coords, stealthMode: stealthMode },
+            (response) => {
+              try {
+                if (chrome.runtime.lastError) {
+                  throw new Error(chrome.runtime.lastError.message);
+                }
+                if (response && response.screenshotBase64) {
+                  resolve(response);
+                } else {
+                  throw new Error("Failed to capture screenshot.");
+                }
+              } catch (error) {
+                Logger.error("Error capturing screenshot:", error);
+                reject(new Error(error.message));
+              }
+            }
+          );
+        } catch (error) {
+          Logger.error("Error in captureScreenshot:", error);
+          reject(new Error(error.message));
+        }
       });
     });
   };
@@ -80,12 +85,10 @@ const Communication = (() => {
    */
   const setupMessageListener = () => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      switch (message.action) {
-        case "check-tesseract-ready":
+      try {
+        if (message.action === "check-tesseract-ready") {
           sendResponse({ tesseractReady: State.getState().tesseractReady });
-          break;
-
-        case "start-ocr-selection":
+        } else if (message.action === "start-ocr-selection") {
           Logger.log("[Content Script] Starting OCR Selection");
 
           let openScreenshot = message.openScreenshot;
@@ -117,10 +120,11 @@ const Communication = (() => {
           const overlay = SelectionOverlay.createSelectionOverlay(stealthMode);
           SelectionOverlay.initSelectionHandlers(overlay, stealthMode);
           sendResponse({ status: "Selection overlay started." });
-          break;
-
-        default:
+        } else {
           Logger.warn("Unknown action:", message.action);
+        }
+      } catch (error) {
+        Logger.error("Error in message listener:", error);
       }
     });
   };
@@ -137,3 +141,4 @@ Communication.setupMessageListener();
 
 // Make Communication available globally if needed
 window.Communication = Communication;
+

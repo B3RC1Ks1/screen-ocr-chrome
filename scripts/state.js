@@ -14,7 +14,6 @@ const State = (() => {
   };
 
   const getState = () => ({ ...state });
-
   const setState = (newState) => {
     Object.assign(state, newState);
   };
@@ -27,3 +26,4 @@ const State = (() => {
 
 // Make State available globally
 window.State = State;
+

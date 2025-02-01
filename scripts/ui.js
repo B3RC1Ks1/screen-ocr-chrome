@@ -2,13 +2,14 @@
 
 const UI = (() => {
   /**
-   * Open extracted text in a new tab
-   * @param {string} text - The OCR extracted text
+   * Open extracted text in a new tab.
+   * @param {string} text - The OCR extracted text.
    */
   const openTextInNewTab = (text) => {
-    const textWin = window.open("", "_blank");
-    if (textWin) {
-      textWin.document.write(`
+    try {
+      const textWin = window.open("", "_blank");
+      if (textWin) {
+        textWin.document.write(`
           <!DOCTYPE html>
           <html>
             <head><title>OCR Result</title></head>
@@ -18,20 +19,24 @@ const UI = (() => {
             </body>
           </html>
         `);
-      textWin.document.close();
-    } else {
-      Logger.error("Failed to open new window for OCR result.");
+        textWin.document.close();
+      } else {
+        Logger.error("Failed to open new window for OCR result.");
+      }
+    } catch (error) {
+      Logger.error("Error opening text in new tab:", error);
     }
   };
 
   /**
-   * Open image in a new tab
-   * @param {string} imageDataUrl - The Base64-encoded image data URL
+   * Open image in a new tab.
+   * @param {string} imageDataUrl - The Base64-encoded image data URL.
    */
   const openImageInNewTab = (imageDataUrl) => {
-    const newWin = window.open("", "_blank");
-    if (newWin) {
-      newWin.document.write(`
+    try {
+      const newWin = window.open("", "_blank");
+      if (newWin) {
+        newWin.document.write(`
           <!DOCTYPE html>
           <html>
             <head><title>Screenshot</title></head>
@@ -40,95 +45,98 @@ const UI = (() => {
             </body>
           </html>
         `);
-      newWin.document.close();
-    } else {
-      Logger.error("Failed to open new window for screenshot.");
+        newWin.document.close();
+      } else {
+        Logger.error("Failed to open new window for screenshot.");
+      }
+    } catch (error) {
+      Logger.error("Error opening image in new tab:", error);
     }
   };
 
   /**
-   * Display the ChatGPT response discreetly based on Stealth Mode
-   * @param {string} answer - The response from ChatGPT
-   * @param {boolean} stealthMode - Whether Stealth Mode is enabled
+   * Display the ChatGPT response discreetly based on Stealth Mode.
+   * @param {string} answer - The response from ChatGPT.
+   * @param {boolean} stealthMode - Whether Stealth Mode is enabled.
    */
   const displayChatGptResponse = (answer, stealthMode) => {
-    // Prevent multiple overlays
-    if (document.getElementById("chatgpt-response-overlay")) return;
+    try {
+      // Prevent multiple overlays
+      if (document.getElementById("chatgpt-response-overlay")) return;
 
-    // Create an overlay
-    const overlay = document.createElement("div");
-    overlay.id = "chatgpt-response-overlay";
+      const overlay = document.createElement("div");
+      overlay.id = "chatgpt-response-overlay";
 
-    if (stealthMode) {
-      // Stealth Mode: Small, borderless, barely visible text in the corner
-      Object.assign(overlay.style, {
-        position: "fixed",
-        bottom: "10px", // Position in the bottom-right corner
-        right: "10px",
-        color: "rgba(0, 0, 0, 0.6)", // Black color with slight opacity
-        backgroundColor: "transparent", // No background
-        padding: "2px 4px", // Minimal padding
-        border: "none", // No border
-        borderRadius: "0px", // No border radius
-        fontSize: "10px", // Very small font size
-        fontFamily: "Arial, sans-serif",
-        zIndex: 1000001,
-        pointerEvents: "none", // Allow clicks to pass through
-        whiteSpace: "pre-wrap", // Preserve formatting
-      });
+      if (stealthMode) {
+        Object.assign(overlay.style, {
+          position: "fixed",
+          bottom: "10px",
+          right: "10px",
+          color: "rgba(0, 0, 0, 0.6)",
+          backgroundColor: "transparent",
+          padding: "2px 4px",
+          border: "none",
+          borderRadius: "0px",
+          fontSize: "10px",
+          fontFamily: "Arial, sans-serif",
+          zIndex: "1000001",
+          pointerEvents: "none",
+          whiteSpace: "pre-wrap",
+        });
 
-      // Add content
-      const content = document.createElement("span");
-      content.textContent = answer; // Use textContent to prevent HTML injection
-      overlay.appendChild(content);
-      document.body.appendChild(overlay);
+        const content = document.createElement("span");
+        content.textContent = answer;
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
 
-      // Automatically remove the overlay after a short duration in Stealth Mode
-      setTimeout(() => {
-        overlay.style.opacity = "0";
-        setTimeout(() => overlay.remove(), 300);
-      }, 3000); // Display for 3 seconds
-    } else {
-      // Normal Mode: Standard overlay with borders and background
-      Object.assign(overlay.style, {
-        position: "fixed",
-        bottom: "10px", // Original position
-        right: "50px",
-        width: "300px",
-        backgroundColor: "white",
-        padding: "10px",
-        borderRadius: "8px",
-        boxShadow: "0 0 10px rgba(0,0,0,0.3)",
-        zIndex: 1000001,
-        cursor: "pointer", // Indicate clickable
-        fontSize: "14px", // Standard font size
-        fontFamily: "Arial, sans-serif",
-      });
+        setTimeout(() => {
+          overlay.style.opacity = "0";
+          setTimeout(() => overlay.remove(), 300);
+        }, 3000); // Display for 3 seconds
+      } else {
+        Object.assign(overlay.style, {
+          position: "fixed",
+          bottom: "10px",
+          right: "50px",
+          width: "300px",
+          backgroundColor: "white",
+          padding: "10px",
+          borderRadius: "8px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+          zIndex: "1000001",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontFamily: "Arial, sans-serif",
+        });
 
-      // Click anywhere on the overlay to remove it
-      overlay.addEventListener("click", () => {
-        overlay.remove();
-      });
+        overlay.addEventListener("click", () => {
+          overlay.remove();
+        });
 
-      // Add content
-      const content = document.createElement("div");
-      content.innerHTML = `
-          <p style="margin: 0;">${sanitizeHtml(answer)}</p>
-        `;
-      overlay.appendChild(content);
-      document.body.appendChild(overlay);
+        const content = document.createElement("div");
+        content.innerHTML = `<p style="margin: 0;">${sanitizeHtml(answer)}</p>`;
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+      }
+    } catch (error) {
+      Logger.error("Error displaying ChatGPT response:", error);
     }
   };
 
   /**
-   * Sanitize HTML to prevent XSS attacks when injecting content into the page
-   * @param {string} html - The HTML content to sanitize
-   * @returns {string} - Sanitized HTML content
+   * Sanitize HTML to prevent XSS attacks.
+   * @param {string} html - The HTML content to sanitize.
+   * @returns {string} Sanitized HTML content.
    */
   const sanitizeHtml = (html) => {
-    const div = document.createElement("div");
-    div.textContent = html;
-    return div.innerHTML;
+    try {
+      const div = document.createElement("div");
+      div.textContent = html;
+      return div.innerHTML;
+    } catch (error) {
+      Logger.error("Error sanitizing HTML:", error);
+      return html;
+    }
   };
 
   return {
@@ -140,3 +148,4 @@ const UI = (() => {
 
 // Make UI available globally
 window.UI = UI;
+
