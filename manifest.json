@@ -1,6 +1,6 @@
 {
   "name": "AskAI",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "manifest_version": 3,
   "description": "Select an area of the screen and get an answer from ChatGPT!",
   "permissions": [
@@ -10,7 +10,7 @@
     "storage"
   ],
   "host_permissions": [
-    "http://localhost:3001/*",
+    "http://localhost:9005/*",
     "https://screen-ocr-chrome.onrender.com/*"
   ],
   "background": {
