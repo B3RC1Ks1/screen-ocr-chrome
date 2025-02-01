@@ -1,6 +1,6 @@
 // /backend/background.js
 
-const SERVER_URL = "http://localhost:9005/chat";
+const SERVER_URL = "https://screen-ocr-chrome.onrender.com/chat";
 
 /**
  * Background Logger Module
