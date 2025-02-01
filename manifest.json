@@ -1,6 +1,6 @@
 {
   "name": "AskAI",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "manifest_version": 3,
   "description": "Select an area of the screen and get an answer from ChatGPT!",
   "permissions": [

@@ -154,7 +154,7 @@ const handleSendOcrText = async (request, sendResponse) => {
           },
           body: JSON.stringify({
             message:
-              "If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration\n" +
+              "You will be provded a question. If you see multiple choice test like A,B,C and so on, return just an answer, without any elaboration or additional text. If you see coding question, just output an answer without any elaboration. If you see task aims to complete incomplete sentences, just output missing word:\n" +
               text,
             model: model, // Include the selected model
           }),
